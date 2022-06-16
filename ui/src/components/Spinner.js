@@ -7,5 +7,5 @@ const BasicSpinner = (props) => (
        <Spinner/>
    </BasicPanel>
   );
-  
+
   export default  BasicSpinner;

@@ -33,7 +33,7 @@ const TempestSkip = (props) =>{
         })
         .catch(err => seterror({error: err}));
     };
-    
+
     function handleOnChange(event){
         setjob_url(event)
     }
@@ -41,13 +41,13 @@ const TempestSkip = (props) =>{
     const AddJobInput = () => (
         <InputGroup>
             <TextInput id="zuul_job"
-                        type="text"    
+                        type="text"
                         key="Zuul_job"
-                        value={job_url}              
-                        onChange={handleOnChange} 
+                        value={job_url}
+                        onChange={handleOnChange}
                         aria-label="ZuuTruel job name"
                         tabIndex={1}/>
-            <Button id="zuul_job_button" 
+            <Button id="zuul_job_button"
                     onClick={()=>addJob(job_url)}
                     tabIndex={2}
                     >Add Job</Button>
@@ -55,7 +55,7 @@ const TempestSkip = (props) =>{
 
     const ShowError = () => {
         error &&
-            <Alert variant="danger" title={error.message}/> 
+            <Alert variant="danger" title={error.message}/>
     }
     return (
         <div>
@@ -69,7 +69,7 @@ const TempestSkip = (props) =>{
                         <AddJobInput/>
                         </CardBasic>
                         <CardBasic>
-                            {Object.values(api).map((i, v) => ( 
+                            {Object.values(api).map((i, v) => (
                                 <JobExpandableSection key={i.id} dict={i}>{console.log(i, v)}</JobExpandableSection>
                             ))}
                         </CardBasic>

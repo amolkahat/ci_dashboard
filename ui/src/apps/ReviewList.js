@@ -15,7 +15,7 @@ import BasicSpinner from "../components/Spinner";
 class ReviewList extends Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
       activeItem: {
         review_url: "",
@@ -44,8 +44,8 @@ class ReviewList extends Component {
   refreshList = () => {
     axios //Axios to send and receive HTTP requests
     .get("http://localhost:8000/api/reviews/")
-    .then(res => this.setState({ taskList: res.data, 
-                                 error: "", 
+    .then(res => this.setState({ taskList: res.data,
+                                 error: "",
                                  newItem:{'review_url': ''},
                                  loading: false }))
     .catch(err => this.setState({error: err}));
@@ -78,7 +78,7 @@ class ReviewList extends Component {
     .delete(`http://localhost:8000/api/reviews/${item}/`)
     .then((res) => this.refreshList());
   }
- 
+
   handleOnChange(event) {
     this.setState({
       newItem: {'review_url': event}
@@ -92,10 +92,10 @@ class ReviewList extends Component {
           <BasicPanel><Alert variant="danger" title={this.state.error.message}/> </BasicPanel>}
         <BasicPanel>
           <InputGroup>
-            <TextInput value={this.state.newItem.review_url} 
-                       name="new_review" id="new_review" 
-                       onChange={this.handleOnChange} 
-                       aria-label="New review input" 
+            <TextInput value={this.state.newItem.review_url}
+                       name="new_review" id="new_review"
+                       onChange={this.handleOnChange}
+                       aria-label="New review input"
                        placeholder="Paste URL here"
                        required/>
             <Button onClick={() => this.handleSubmit(this.state.newItem)} id="new_review_submit" variant="primary">

@@ -9,7 +9,7 @@ class ZuulJob(models.Model):
     id = models.AutoField(primary_key=True)
     job_name = models.TextField(max_length=100)
     job_url = models.URLField(unique=True,max_length=200)
- 
+
     def __str__(self):
         """
         """

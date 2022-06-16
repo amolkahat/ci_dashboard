@@ -10,14 +10,14 @@ const SingleOption = (props) => {
     const onToggle = () => {
           setisOpen(!isOpen);
     };
-      
+
     const onSelect = event => {
         const id = event.currentTarget.id;
         console.log(id)
         setselectedOption(id)
         settoggleTemplateText(id)
     }
-    
+
     const menuItems = [
       <OptionsMenuItem onSelect={onSelect} isSelected={selectedOption === "singleOption1"} id="singleOption1" key="option 1">Option 1</OptionsMenuItem>,
       <OptionsMenuItem onSelect={onSelect} isSelected={selectedOption === "singleOption2"} id="singleOption2" key="option 2">Option 2</OptionsMenuItem>,
@@ -26,9 +26,9 @@ const SingleOption = (props) => {
     const toggle = <OptionsMenuToggle onToggle={onToggle} toggleTemplate={toggleTemplateText} />
 
     return (
-      <OptionsMenu 
-        id="options-menu-single-option-example" 
-        menuItems={menuItems} 
+      <OptionsMenu
+        id="options-menu-single-option-example"
+        menuItems={menuItems}
         isOpen={isOpen}
         toggle={toggle}/>
     );

@@ -1,10 +1,11 @@
 # Create your views here.
 
 
-from rest_framework import viewsets
-
 from devtools.models import ZuulJob, ZuulJobHistory
-from devtools.serializers import ZuulJobReadSerializer, ZuulJobWriteSerializer, ZuulJobHistorySerializer
+from devtools.serializers import (ZuulJobHistorySerializer,
+                                  ZuulJobReadSerializer,
+                                  ZuulJobWriteSerializer)
+from rest_framework import viewsets
 
 
 class ZuulJobsViewSet(viewsets.ModelViewSet):

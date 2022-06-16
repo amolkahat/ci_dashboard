@@ -1,8 +1,8 @@
-from rest_framework import serializers
- 
 # import the todo data model
 from devtools.models import ZuulJob, ZuulJobHistory
- 
+from rest_framework import serializers
+
+
 # create a serializer class
 class ZuulJobReadSerializer(serializers.ModelSerializer):
     """

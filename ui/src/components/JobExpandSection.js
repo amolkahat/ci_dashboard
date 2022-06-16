@@ -11,7 +11,7 @@ const JobExpandableSection =  (props) => {
     const [jobHistory, setJobHistory] = useState([]);
     const [isExpanded, setIsExpanded] = useState(false)
     const [error, setError] = useState("")
-    
+
     function onToggle(isExpanded){
       setIsExpanded(!isExpanded)
     }

@@ -21,7 +21,7 @@ class Promoter extends React.Component{
     componentDidMount(){
         this.requestDLRN()
     }
-    
+
     requestDLRN = (url, params)=>{
         axios
         .get("https://cors-anywhere.herokuapp.com/" + this.url, {params: params})
