@@ -13,17 +13,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from posixpath import basename
 from devtools.views import ZuulJobHistoryViewSet, ZuulJobsViewSet
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework import routers
+# from rest_framework import routers
+from rest_framework_nested import routers
 
 router = routers.DefaultRouter()
 
-router.register(r'tools', ZuulJobsViewSet, 'tools')
-router.register(r'history', ZuulJobHistoryViewSet, 'history')
+router.register(r'jobs', ZuulJobsViewSet, 'jobs')
+
+domains_router = routers.NestedSimpleRouter(router, r'jobs', lookup='job')
+domains_router.register(r'history', ZuulJobHistoryViewSet, basename='jobs-history')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls))
+    path('api/', include(router.urls)),
+    path('api/', include(domains_router.urls))
 ]

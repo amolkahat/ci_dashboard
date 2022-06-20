@@ -1,6 +1,6 @@
 // import Component from the react module
 import { Alert, Button, InputGroup, TextInput } from "@patternfly/react-core";
-import React, { Component, useState } from "react";
+import React, { Component, useEffect, useState } from "react";
 import DisclosureExpandableSection from "../components/JobExpandSection";
 import { Panel, PanelFooter, PanelHeader, PanelMain, PanelMainBody } from '@patternfly/react-core';
 import axios from "axios";
@@ -18,23 +18,28 @@ const TempestSkip = (props) =>{
     const [loading, setloading] = useState(false)
 
     function addJob(item){
-        axios.post("http://localhost:8000/api/tools/", {'job_url': item})
+        axios.post("http://localhost:8000/api/jobs/", {'job_url': item})
         .then(res => refreshList())
-        .catch(err => seterror({error: err}))
+        .catch(err => setTimeout(seterror({error: err}), 2000))
     }
-
+    
+    useEffect(()=> {
+        refreshList()
+    }, []);
     function refreshList(){
         axios
-        .get("http://localhost:8000/api/tools/")
+        .get("http://localhost:8000/api/jobs/")
         .then(res => {
             setloading(true)
             seterror("")
+            console.log("Refresh list: ", res)
             setapi(res.data)
         })
         .catch(err => seterror({error: err}));
     };
 
     function handleOnChange(event){
+        console.log(event)
         setjob_url(event)
     }
 

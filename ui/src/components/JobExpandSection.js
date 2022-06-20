@@ -11,13 +11,15 @@ const JobExpandableSection =  (props) => {
     const [jobHistory, setJobHistory] = useState([]);
     const [isExpanded, setIsExpanded] = useState(false)
     const [error, setError] = useState("")
+    const [job_id, setjob_id] = useState(1)
 
-    function onToggle(isExpanded){
+    function onToggle(isExpanded, id){
       setIsExpanded(!isExpanded)
+      getHistory(id)
     }
 
-    function getHistory(job_name){
-      axios.get(`https://zuul.opendev.org/api/tenant/openstack/builds?job_name=${job_name}`
+    function getHistory(job_id){
+      axios.get(`http://localhost:8000/api/jobs/${job_id}/history`
         , {'crossdomain': true})
       .then(res=> {
         const history = [jobHistory, {job_name: res.data}];
@@ -26,16 +28,10 @@ const JobExpandableSection =  (props) => {
       .catch(err=> console.log(err))
     };
 
-    function loadJobHistory(url){
-      axios.get(url)
-      .then(res => setJobHistory(res))
-      .catch(err => setError(err))
-    }
-
   return (
       <ExpandableSection
         toggleText={isExpanded ? dict.job_name : dict.job_name}
-        onToggle={() => onToggle(isExpanded)}
+        onToggle={() => onToggle(isExpanded, dict.id)}
         isExpanded={isExpanded}
         displaySize="large"
         isWidthLimited

@@ -77,7 +77,6 @@ def main():
     bug_data = get_bugs(args.status,
                           args.tag,
                           args.previous_days)
-    import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
     main()

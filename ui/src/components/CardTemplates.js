@@ -120,7 +120,7 @@ export const CardExpandable = () => {
 export const CardSelectableA11yHighlight = () => {
   const [selected, setSelected] = React.useState('');
 
-  const onKeyDown = (event: React.KeyboardEvent) => {
+  const onKeyDown = (event) => {
     if (event.target !== event.currentTarget) {
       return;
     }
@@ -131,12 +131,12 @@ export const CardSelectableA11yHighlight = () => {
     }
   };
 
-  const onClick = (event: React.MouseEvent) => {
+  const onClick = (event) => {
     const newSelected = event.currentTarget.id === selected ? null : event.currentTarget.id;
     setSelected(newSelected);
   };
 
-  const onChange = (labelledById: string, _event: React.FormEvent<HTMLInputElement>) => {
+  const onChange = (labelledById, _event) => {
     const newSelected = labelledById === selected ? null : labelledById;
     setSelected(newSelected);
   };

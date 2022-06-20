@@ -79,6 +79,12 @@ class VerticalPage extends React.Component {
           <NavItem itemId={1} isActive={activeItem === 1}>
           <Link to='/promoter'>Promoter</Link>
           </NavItem>
+          <NavItem itemId={2} isActive={activeItem === 2}>
+          <Link to='/tempest'>Tempset</Link>
+          </NavItem>
+          <NavItem itemId={3} isActive={activeItem === 3}>
+          <Link to='/zuul'>Zuul</Link>
+          </NavItem>
         </NavList>
       </Nav>
     );
