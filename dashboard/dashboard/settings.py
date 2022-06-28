@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
-import redis
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,15 +30,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'devtools',
-    'rest_framework',
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'devtools',
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -145,15 +144,19 @@ CORS_ORIGIN_WHITELIST = (
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
 
-# Celery connection details for local
+# # Celery connection details for local
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
+# # REDIS_HOST = 'localhost'
+# # REDIS_PORT = 6379
 
-BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+# # BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
-CELERY_BROKER_URL =  CELERY_BROKER_URL = f"amqp://guest:guest@{REDIS_HOST}:{REDIS_PORT}"
-CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+# # CELERY_BROKER_URL =  CELERY_BROKER_URL = f"amqp://guest:guest@{REDIS_HOST}:{REDIS_PORT}"
+# # CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 
-redis_instance = redis.StrictRedis(host=REDIS_HOST,
-                                  port=REDIS_PORT, db=0)
+# CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+# CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+
+
+# # redis_instance = redis.StrictRedis(host=REDIS_HOST,
+# #                                   port=REDIS_PORT, db=0)

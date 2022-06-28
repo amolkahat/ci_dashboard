@@ -6,7 +6,8 @@ import ReviewList from "./apps/ReviewList";
 import Mirrors from "./apps/Mirrors";
 import Promoter from "./apps/Promoter";
 import TempestSkip from "./apps/Tempest";
-import RRTools from "./apps/RRTools";
+import {RRToolsTab} from "./components/Tabs";
+
 
 
 class App extends Component {
@@ -16,7 +17,7 @@ class App extends Component {
       <BrowserRouter>
         <VerticalPage>
           <Routes>
-            <Route index element={<RRTools/>}/>
+            <Route index element={<RRToolsTab/>}/>
             <Route path='mirrors' element={<Mirrors/>}/>
             <Route path='promoter' element={<Promoter/>}/>
             <Route path='tempest' element={<TempestSkip/>}/>

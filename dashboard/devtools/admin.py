@@ -1,8 +1,9 @@
 from django.contrib import admin
 
+from .models import ZuulJob, ZuulJobHistory
+
 # Register your models here.
 
-from .models import ZuulJob, ZuulJobHistory
 
 
 admin.site.register(ZuulJob)

@@ -19,11 +19,10 @@ const JobExpandableSection =  (props) => {
     }
 
     function getHistory(job_id){
-      axios.get(`http://localhost:8000/api/jobs/${job_id}/history`
+      axios.get(`http://localhost:8000/api/jobs/${job_id}/history/`
         , {'crossdomain': true})
       .then(res=> {
-        const history = [jobHistory, {job_name: res.data}];
-        setJobHistory(history)
+        setJobHistory(res.data)
       })
       .catch(err=> console.log(err))
     };
@@ -36,8 +35,7 @@ const JobExpandableSection =  (props) => {
         displaySize="large"
         isWidthLimited
       >
-        <Button onClick={()=>getHistory(dict.job_name)}><SyncAltIcon/> Load data </Button>
-        {console.log(jobHistory)}
+
       </ExpandableSection>
     )
 }

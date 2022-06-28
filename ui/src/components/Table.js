@@ -5,12 +5,41 @@ import { Bullseye, Card, EmptyState, EmptyStateIcon, Spinner, Title } from '@pat
 import { Table, TableHeader, TableBody } from '@patternfly/react-table';
 
 
-const Repository =  {
-  name: "",
-  branches: "",
-  prs: "",
-  workspaces: "",
-  lastCommit: "",
+export const LaunchpadTableStriped = (props) => {
+  const repositories = props.repos;
+  const columnNames = props.columns || {
+    id: 'ID',
+    title: 'Title',
+    status: 'Status',
+    tags: 'Tags',
+  };
+
+  const title = props.title;
+  return (
+    <OuterScrollContainer>
+      <TableComposable variant='compact' aria-label="Simple table" isStriped>
+        <Caption>{title}</Caption>
+        <Thead>
+            <Tr>
+            <Th>{columnNames.id}</Th>
+            <Th>{columnNames.title}</Th>
+            <Th>{columnNames.status}</Th>
+            <Th>{columnNames.tags}</Th>
+            </Tr>
+        </Thead>
+        <Tbody>
+            {repositories.map(repo => (
+            <Tr key={repo.id}>
+                <Td dataLabel={columnNames.id}><a href={repo.id}>{repo.id}</a></Td>
+                <Td dataLabel={columnNames.status}>{repo.title}</Td>
+                <Td dataLabel={columnNames.link}>{repo.status}</Td>
+                <Td dataLabel={columnNames.tag}>{repo.tags}</Td>
+            </Tr>
+            ))}
+        </Tbody>
+      </TableComposable>
+    </OuterScrollContainer>
+  )
 }
 
 export const ComposableTableStriped = (props) => {
@@ -218,7 +247,7 @@ export const ComposableTableExpandable = (props) => {
   ];
 
   return (
-    <TableComposable aria-label="Simple table">
+    <TableComposable variant='compact' aria-label="Simple table">
       <Thead>
         <Tr>
           <Td />
@@ -269,4 +298,4 @@ export const ComposableTableExpandable = (props) => {
 };
 
 
-export default {LoadingStateDemo, ComposableTableStriped, ComposableTableExpandable};
+export default {LaunchpadTableStriped, LoadingStateDemo, ComposableTableStriped, ComposableTableExpandable};

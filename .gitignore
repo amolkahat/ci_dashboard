@@ -8,8 +8,6 @@ dist
 build
 eggs
 .tox/
-jenkins/config.ini
-ci-scripts/promoter-setup/secrets.yml
 *.pyc
 .idea/
 .pytest_cache/
@@ -19,3 +17,4 @@ weirdo_token
 .venv
 .coverage
 .coverage.*
+dashboard/devtools/migrations/
