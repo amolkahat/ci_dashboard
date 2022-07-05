@@ -4,3 +4,5 @@ django-cors-headers
 drf-nested-routers
 launchpadlib
 celery
+bs4
+diskcache

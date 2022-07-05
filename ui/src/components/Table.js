@@ -1,8 +1,60 @@
 import React from 'react';
 import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td, OuterScrollContainer, ActionsColumn, ExpandableRowContent,TableText } from '@patternfly/react-table';
-import { Button } from '@patternfly/react-core';
+import { Button, innerDimensions } from '@patternfly/react-core';
 import { Bullseye, Card, EmptyState, EmptyStateIcon, Spinner, Title } from '@patternfly/react-core';
 import { Table, TableHeader, TableBody } from '@patternfly/react-table';
+
+
+
+export const DynamicTable = (props) => {
+  const head = props.head;
+  const data = props.data;
+
+  function tableRows(table_rows){
+    return table_rows.map(data => {
+      Object.entries(data).map((key, value) => {
+        Object.entries(value).map((v)=> {
+          console.log("////" + v)
+        })
+        console.log(key + " ===== " + value)
+      })
+      console.log(data, data.job_name)
+      return  data.map(inner_data => (
+              <Tr key={inner_data.uuid}>
+                {/* <Td key="1">{inner_data.job_name_id}</Td> */}
+                <Td key="2"><a href={inner_data.tests_log_url}>Logs</a></Td>
+                {/* <Td key="3">{inner_data.duration}</Td> */}
+                {/* <Td key="4">{inner_data.end_time}</Td>
+                <Td key="5">{inner_data.event_timestamp}</Td> */}
+                <Td key="6">{inner_data.project}</Td>
+                <Td key="7">{inner_data.pipeline}</Td>
+                <Td key="8">{inner_data.result}</Td>
+                <Td key="9">{inner_data.voting}</Td>
+                <Td key="10">{inner_data.job_tests.split(",").join("<br/>")}</Td>
+              </Tr>
+          ));
+     });
+  }
+
+  return (
+    <OuterScrollContainer>
+      <TableComposable variant='compact' aria-label='Dynamic Table' isStriped>
+        <Caption>Dynamic Table</Caption>
+        <Thead>
+          <Tr>
+            {head.map((value, index) => {
+              return <Td key={index}>{value}</Td>
+            })}
+          </Tr>
+        </Thead>
+        <Tbody>
+          {console.log("FromTable", data)}
+          {tableRows(data)}
+        </Tbody>
+      </TableComposable>
+    </OuterScrollContainer>
+  )
+}
 
 
 export const LaunchpadTableStriped = (props) => {
@@ -16,7 +68,6 @@ export const LaunchpadTableStriped = (props) => {
 
   const title = props.title;
   return (
-    <OuterScrollContainer>
       <TableComposable variant='compact' aria-label="Simple table" isStriped>
         <Caption>{title}</Caption>
         <Thead>
@@ -38,7 +89,6 @@ export const LaunchpadTableStriped = (props) => {
             ))}
         </Tbody>
       </TableComposable>
-    </OuterScrollContainer>
   )
 }
 
@@ -181,7 +231,6 @@ const NestedReposTable = (props) => {
 };
 
 export const ComposableTableExpandable = (props) => {
-  console.log("FROM Table", props.data)
   const repositories = props.data || [
     { aggregate_hash: 'Node 1', commit_hash: '10', component: '2', nestedComponent: <NestedReposTable />, promote_name: <a>Link 1</a> },
     { aggregate_hash: 'Node 2', commit_hash: '3', component: '4', promote_name: <a>Link 2</a> },
@@ -298,4 +347,4 @@ export const ComposableTableExpandable = (props) => {
 };
 
 
-export default {LaunchpadTableStriped, LoadingStateDemo, ComposableTableStriped, ComposableTableExpandable};
+export default {DynamicTable, LaunchpadTableStriped, LoadingStateDemo, ComposableTableStriped, ComposableTableExpandable};

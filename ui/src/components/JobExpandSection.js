@@ -3,7 +3,7 @@ import { Button, ExpandableSection } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import {CardBasic} from './CardTemplates';
 import axios from 'axios';
-import {LoadingStateDemo} from './Table';
+import {DynamicTable, LoadingStateDemo} from './Table';
 import { RedditSquareIcon, SyncAltIcon } from '@patternfly/react-icons'
 
 const JobExpandableSection =  (props) => {
@@ -33,9 +33,13 @@ const JobExpandableSection =  (props) => {
         onToggle={() => onToggle(isExpanded, dict.id)}
         isExpanded={isExpanded}
         displaySize="large"
-        isWidthLimited
       >
-
+        <DynamicTable 
+          head={[ //  "job_name_id", 
+                "tests_log_url", 
+                 // "duration",  "end_time", "event_timestamp", 
+                  "project", "pipeline", "result", "voting", "job_tests"]}
+          data={[jobHistory]}/>
       </ExpandableSection>
     )
 }

@@ -159,7 +159,7 @@ def combine_testcases(log_url):
     return pass_test_cases_names + fail_test_cases_names
 
 
-def get_result(log_url, release):
+def get_result(log_url):
     """
     This function returns the list of testcase name and
     status of the test case
@@ -167,21 +167,20 @@ def get_result(log_url, release):
     result = {}
     combine = zip(combine_testcases(log_url), combine_status(log_url))
     test_status = {str(x): str(y) for x, y in combine}
-    result[release] = test_status
-    return result
+    return test_status
 
 
-def output(log_url, release):
+def output(log_url):
     """
     This function returns the result of parsed data.
     """
     dump_dir = get_last_build(log_url)
     print(dump_dir)
-    return get_result(dump_dir, release)
+    return get_result(dump_dir)
 
 
 if __name__ == "__main__":
     log_url = "https://logserver.rdoproject.org/openstack-component-network/opendev.org/openstack/tripleo-ci/"
     "master/periodic-tripleo-ci-centos-8-standalone-network-wallaby/bebc93c/logs/undercloud/var/log/tempest/"
     "stestr_results.html.gz"
-    print(output(log_url, 'master'))
+    print(output(log_url))

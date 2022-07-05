@@ -9,11 +9,11 @@ def _make_request(url):
     try:
         log.debug("Request: {}".format(url))
         data = requests.get(url)
-        if requests.status_codes == 200:
-            log.debug("Request succeed")
+        if data.status_code == 200:
+            print("Request succeed")
             return data.json()
         else:
-            log.debug("Request failed")
+            print("Request failed")
             log.error(data.text)
             return data.text
     except requests.exceptions.HTTPError as err:

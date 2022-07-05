@@ -1,7 +1,7 @@
 # Create your views here.
 
-from devtools import models
-from devtools.lib import zuul
+from devtools.lib.mirror_sync_status import get_rdo_mirrors
+from devtools import serializers
 from devtools.models import LaunchpadBugs, ZuulJob, ZuulJobHistory
 from devtools.serializers import (LaunchpadBugsSerializer,
                                   ZuulJobHistorySerializer,
@@ -10,7 +10,31 @@ from devtools.serializers import (LaunchpadBugsSerializer,
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from django.conf  import settings
 from dashboard.tasks import add_history_records
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+import  logging
+import json
+import redis
+logger = logging.getLogger(__name__)
+
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+
+
+class MirrorViewSet(viewsets.ViewSet):
+    serializer_class = serializers.MirrorSerializer
+
+    def list(self, request):
+        r = redis.Redis()
+        data = r.get('mirrors')
+        if not data[0]:
+            print("Setting data")
+            yourdata = get_rdo_mirrors('master', 'centos9')
+            r.set('mirrors', json.dumps(yourdata))
+        serializer = serializers.MirrorSerializer(
+            instance=json.loads(data)['master'], many=True
+        )
+        return Response(serializer.data)
 
 
 class ZuulJobsViewSet(viewsets.ModelViewSet):
@@ -27,42 +51,20 @@ class ZuulJobsViewSet(viewsets.ModelViewSet):
                 return self.detail_serializer_class
         return super().get_serializer_class()
 
+    def list(self, serializer):
+        data = ZuulJobWriteSerializer(self.queryset, many=True)
+        return Response(data.data)
+
+
     def perform_create(self, serializer):
-        d = {'job_name': '', 'job_domain': '', 'job_url': ''}
-        d['job_url'] = serializer.validated_data.get('job_url')
-        d['job_name'] = serializer.validated_data.get('job_name')
-        d['job_domain'] = serializer.validated_data.get('job_domain')
+        d = {'job_name': serializer.validated_data.get('job_name', ""),
+             'job_domain': serializer.validated_data.get('job_domain', ""),
+             'job_url': serializer.validated_data.get('job_url', "")}
         serializer.validated_data.update(d)
-
-        def extract_tests(zuulJob):
-            test_data = []
-            for test in zuulJob.get_tests():
-                for k, v in test.items():
-                    test_data.append(f"{k}_{v}")
-            return test_data
-
-        job_dict = d.copy()
-        print("From Celery task: ", job_dict)
-        job_obj = models.ZuulJob.objects.filter(job_name=job_dict['job_name'])
-        zuul_obj = zuul.ZuulJob(job_dict['job_name'], job_dict['job_url'], **job_dict)
-        job_builds = zuul_obj.get_builds()
-        for job in job_builds:
-            log_url = job.log_url
-            tests = extract_tests(job)
-            models.ZuulJobHistory(
-                job_name=job_obj,
-                uuid=job.build_uuid,
-                tests_log_url=log_url,
-                duration=job.kwargs['duration'],
-                end_time=job.kwargs['end_time'],
-                event_timestamp=job.kwargs['event_timestamp'],
-                project=job.kwargs['project'],
-                pipeline=job.kwargs['pipeline'],
-                result=job.kwargs['result'],
-                voting=job.kwargs['voting'],
-                job_tests=tests,
-            ).save()
         serializer.save()
+        add_history_records(d)
+
+
 
 
 class ZuulJobHistoryViewSet(viewsets.ViewSet):

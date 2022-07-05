@@ -51,3 +51,16 @@ class LaunchpadBugsSerializer(viewsets.ReadOnlyModelViewSet):
         """
         model = LaunchpadBugs
         fields = "__all__"
+
+
+class MirrorSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=256)
+    status = serializers.CharField(max_length=20)
+    release = serializers.CharField(max_length=20)
+    distro = serializers.CharField(max_length=20)
+
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        return instance

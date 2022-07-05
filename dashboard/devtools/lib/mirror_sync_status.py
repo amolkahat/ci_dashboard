@@ -8,6 +8,7 @@ For running: $python3 mirror_sync_status.py
 """
 from email import header
 import posixpath
+import re
 
 import click
 import requests
@@ -133,7 +134,7 @@ class RDOMirror:
         return f"{md5_hash[:2]}/{md5_hash[2:4]}/{md5_hash}"
 
     # Construct full proxy url
-    def get_rdo_proxy_url(self, mirror, distro, release, md5_hash):
+    def get_rdo_proxy_url(self, mirror, distro, release, md5_hash=None):
         """
         Return full rdo mirror proxy url
         """
@@ -143,6 +144,7 @@ class RDOMirror:
             release = self.release
         release_distro_path = posixpath.join('-'.join([distro, release]), 'current-tripleo')
         rdo_url = ":".join([mirror, '8080/rdo'])
+        
         dlrn_md5_url = self.construct_dlrn_md5_hash_url(md5_hash)
         return posixpath.join(rdo_url, release_distro_path, dlrn_md5_url, "delorean.repo.md5")
 
@@ -160,15 +162,18 @@ class RDOMirror:
             return "Not found"
 
 
-# Run RDO Mirror sync verification
-if __name__ == "__main__":
-    release = 'train'
-    distro = 'centos8'
+def get_rdo_mirrors(release, distro):
+    """
+    """
+    mirror_list = {release: []}
     rdo_mirror = RDOMirror(release, distro)
     md5_sum = rdo_mirror.get_delorean_md5_hash()
-    print(f"Expected Hash to be present: {md5_sum}")
-    print(f"=== Performing verification for {release} ===")
     for mirror in target_mirrors:
         rdo_proxy_url = rdo_mirror.get_rdo_proxy_url(mirror, distro, release, md5_sum)
-        status = rdo_mirror.verify_content(rdo_proxy_url, md5_sum)
-        print("{} - {} - {} -> {}".format(distro, release, mirror, rdo_mirror.verify_content(rdo_proxy_url, md5_sum)))
+        d = {}
+        d['name'] = mirror
+        d['release'] = release
+        d['distro'] = distro
+        d['status'] = rdo_mirror.verify_content(rdo_proxy_url, md5_sum)
+        mirror_list[release].append(d)
+    return mirror_list
