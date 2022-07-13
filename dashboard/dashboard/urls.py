@@ -34,7 +34,6 @@ domains_router.register(r'history', ZuulJobHistoryViewSet,
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/', include(domains_router.urls)),
-    # path('api/', include(rr_router.urls))
+    path('api/', include("devtools.urls")),
+    path('api/', include("promoter.urls")),
 ]

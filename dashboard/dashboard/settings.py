@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'devtools',
     'rest_framework',
     'corsheaders',
+    'promoter',
 ]
 
 MIDDLEWARE = [
@@ -187,20 +188,11 @@ CACHES = {
     }
 }
 
-
-# # Celery connection details for local
-
-# # REDIS_HOST = 'localhost'
-# # REDIS_PORT = 6379
-
-# # BROKER_URL = 'amqp://guest:guest@localhost:5672/'
-
-# # CELERY_BROKER_URL =  CELERY_BROKER_URL = f"amqp://guest:guest@{REDIS_HOST}:{REDIS_PORT}"
-# # CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-
-# CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-# CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
-
-
-# # redis_instance = redis.StrictRedis(host=REDIS_HOST,
-# #                                   port=REDIS_PORT, db=0)
+REST_FRAMEWORK = {
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
