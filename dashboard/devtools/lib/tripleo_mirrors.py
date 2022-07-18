@@ -35,10 +35,8 @@ def get_mirror_info(mirror_file_name):
         data = yaml.load(f, yaml.FullLoader)
     mirror_list = data["letsencrypt_certs"]
     mirror_key = (
-        os.path.basename(mirror_file_name)
-            .replace(".opendev.org.yaml", ".main")
-            .replace(".", "-")
-    )
+        os.path.basename(mirror_file_name).replace(".opendev.org.yaml",
+                                                   ".main").replace(".", "-"))
     return mirror_list[mirror_key]
 
 

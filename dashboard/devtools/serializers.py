@@ -1,7 +1,6 @@
 """
 Serializers
 """
-# import the todo data model
 from devtools.models import LaunchpadBugs, ZuulJob, ZuulJobHistory
 from rest_framework import serializers, viewsets
 
@@ -54,13 +53,19 @@ class LaunchpadBugsSerializer(viewsets.ReadOnlyModelViewSet):
 
 
 class MirrorSerializer(serializers.Serializer):
+    """
+    Mirror serializer.
+    """
     name = serializers.CharField(max_length=256)
     status = serializers.CharField(max_length=20)
     release = serializers.CharField(max_length=20)
     distro = serializers.CharField(max_length=20)
 
-
     def update(self, instance, validated_data):
         for field, value in validated_data.items():
             setattr(instance, field, value)
         return instance
+
+    def create(self, validated_data):
+        for field, value in validated_data.items():
+            setattr(self, field, value)

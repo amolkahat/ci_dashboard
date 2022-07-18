@@ -22,7 +22,6 @@ def get_history(job):
     :param job:
     :return:
     """
-    jobs_data = {'job_name': job.job_name}
     if 'opendev' in job.job_url:
         data_dict = ZUUL_LIST['opendev']
         tmp_url = data_dict['opendev'].get('url')

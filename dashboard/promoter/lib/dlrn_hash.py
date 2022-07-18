@@ -172,7 +172,7 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
 
     def __ne__(self, other):
         """
-        Implement special methods of comparison with other object if compatible.
+        Implement special methods of comparison with other object if compatible
         Raises error if not.
         :param other: The object to compare self to
         :return: bool
@@ -313,7 +313,7 @@ class DlrnAggregateHash(DlrnHashBase):
 
     def __eq__(self, other):
         """
-        Implement special methods of comparison with other object if compatible.
+        Implement special methods of comparison with other object if compatible
         Raises error if not.
         :param other: The object to compare self to
         :return: bool
@@ -333,7 +333,7 @@ class DlrnAggregateHash(DlrnHashBase):
 
     def __ne__(self, other):
         """
-        Implement special methods of comparison with other object if compatible.
+        Implement special methods of comparison with other object if compatible
         Raises error if not.
         :param other: The object to compare self to
         :return: bool
@@ -370,6 +370,7 @@ class DlrnAggregateHash(DlrnHashBase):
             distro_hash=self.distro_hash,
             extended_hash=self.extended_hash,
             full_hash=self.full_hash,
+            component=self.component,
             timestamp=self.timestamp,
         )
         return result

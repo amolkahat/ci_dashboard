@@ -1,0 +1,5 @@
+- Get candidate hashes with job, component name and hash count from release table
+  - Write combine function for it
+  - It will also leads to promote images and containers
+
+- 

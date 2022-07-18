@@ -6,11 +6,8 @@ upstream cloud or not.
 For running: $python3 mirror_sync_status.py
 
 """
-from email import header
 import posixpath
-import re
 
-import click
 import requests
 
 # Target Mirrors generated using get_all_upstream_mirrors.py script
@@ -56,12 +53,12 @@ releases = ["master", "wallaby", "victoria", "ussuri", "train"]
 rdo_content_port_slug = "8080/rdo"
 
 # CentOS Package Compose
-centos_8_compose = "https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID"
-centos_9_compose = "https://odcs.stream.centos.org/production/latest-CentOS-Stream/compose/.composeinfo"
+CENTOS_8_COMPOSE = "https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID"
+CENTOS_9_COMPOSE = "https://odcs.stream.centos.org/production/latest-CentOS-Stream/compose/.composeinfo"  # noqa E501
 
 # CentOS Mirror slug
-centos_8_slug = "centos/8-stream/COMPOSE_ID"
-centos_9_slug = "centos-stream/9-stream/COMPOSE_ID"
+CENTOS_8_SLUG = "centos/8-stream/COMPOSE_ID"
+CENTOS_9_SLUG = "centos-stream/9-stream/COMPOSE_ID"
 
 
 # Get CentOS compose ID
@@ -73,9 +70,9 @@ class CentosMirror:
         self.distro = distro
 
         if distro == 'centos8':
-            self.compose_url = centos_8_compose
+            self.compose_url = CENTOS_8_COMPOSE
         else:
-            self.compose_url = centos_9_compose
+            self.compose_url = CENTOS_9_COMPOSE
         self.compose_id = self._get_compose_id()
         self.mirror_list = target_mirrors
 
@@ -85,7 +82,7 @@ class CentosMirror:
         """
         return requests.get(self.compose_url).text
 
-    def _construct_centos_mirror(self, mirror, centos_slug=centos_8_slug):
+    def _construct_centos_mirror(self, mirror, centos_slug=CENTOS_8_SLUG):
         """
         Construct the CentOS proxy mirror
         """
@@ -106,12 +103,14 @@ class RDOMirror:
         self.dlrn_md5_url = posixpath.join(self.rdo_source, self.rdo_slug,
                                            self.dlrn_md5)
 
+    def verify_url(self):
+        url = self.rdo_source + "/" + posixpath.join(
+            "-".join([self.distro, self.release]))
+        return self.__make_request(url)
+
     def __make_request(self, url, **headers):
         data = requests.get(url, headers=headers)
-        if data.status_code == 200:
-            return data.text
-        else:
-            return None
+        return data
 
     # Get dlrn md5 hash
     def get_delorean_md5_hash(self,
@@ -133,7 +132,7 @@ class RDOMirror:
         """
         return f"{md5_hash[:2]}/{md5_hash[2:4]}/{md5_hash}"
 
-    # Construct full proxy url
+    # Construct full proxy urlfetchMirrors
     def get_rdo_proxy_url(self, mirror, distro, release, md5_hash=None):
         """
         Return full rdo mirror proxy url
@@ -142,11 +141,13 @@ class RDOMirror:
             distro = self.distro
         if not release:
             release = self.release
-        release_distro_path = posixpath.join('-'.join([distro, release]), 'current-tripleo')
+        release_distro_path = posixpath.join('-'.join([distro, release]),
+                                             'current-tripleo')
         rdo_url = ":".join([mirror, '8080/rdo'])
-        
+
         dlrn_md5_url = self.construct_dlrn_md5_hash_url(md5_hash)
-        return posixpath.join(rdo_url, release_distro_path, dlrn_md5_url, "delorean.repo.md5")
+        return posixpath.join(rdo_url, release_distro_path, dlrn_md5_url,
+                              "delorean.repo.md5")
 
     def verify_content(self, content_url, compare_content):
         """
@@ -167,13 +168,18 @@ def get_rdo_mirrors(release, distro):
     """
     mirror_list = {release: []}
     rdo_mirror = RDOMirror(release, distro)
-    md5_sum = rdo_mirror.get_delorean_md5_hash()
-    for mirror in target_mirrors:
-        rdo_proxy_url = rdo_mirror.get_rdo_proxy_url(mirror, distro, release, md5_sum)
-        d = {}
-        d['name'] = mirror
-        d['release'] = release
-        d['distro'] = distro
-        d['status'] = rdo_mirror.verify_content(rdo_proxy_url, md5_sum)
-        mirror_list[release].append(d)
-    return mirror_list
+    if rdo_mirror.verify_url():
+        md5_sum = rdo_mirror.get_delorean_md5_hash().text
+        for mirror in target_mirrors:
+            rdo_proxy_url = rdo_mirror.get_rdo_proxy_url(mirror, distro,
+                                                         release,
+                                                         md5_sum)
+            d = {}
+            d['name'] = mirror
+            d['release'] = release
+            d['distro'] = distro
+            d['status'] = rdo_mirror.verify_content(rdo_proxy_url, md5_sum)
+            mirror_list[release].append(d)
+        return mirror_list
+    else:
+        return "Invalid release or distro"

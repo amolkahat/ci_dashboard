@@ -1,9 +1,9 @@
 import json
 import os
-import urllib
 
 import requests
-from . import tempest_html_json, utils
+
+from . import tempest_html_json, utils  # noqa E402
 
 ZUUL_LIST = {
     'opendev': {'name:': 'opendev',
@@ -17,10 +17,10 @@ ZUUL_LIST = {
     'redhat.com': {'name': "", 'url': "", 'tenant': "", 'api_slug': ''},
 }
 
-
 import logging
 
 log = logging.getLogger(__name__)
+
 
 class ZuulJob:
     """
@@ -36,7 +36,8 @@ class ZuulJob:
         self.log_url = kwargs.get('log_url', None)
         self.kwargs = kwargs
         self.tempest_path = "/logs/undercloud/var/log/tempest/"
-        self.tempest_result_file = "stestr_results.html" if self.release == "master" else "stestr_results.html.gz"
+        self.tempest_result_file = "stestr_results.html" \
+            if self.release == "master" else "stestr_results.html.gz"
         self.api_url = self.domain['url'] + self.domain['api_slug']
         self.job_builds = []
 
@@ -62,7 +63,8 @@ class ZuulJob:
             # Check log url exists else skip.
             if not job.get('log_url', None):
                 continue
-            tempest_path = job.get('log_url') + self.tempest_path + self.tempest_result_file
+            tempest_path = job.get(
+                'log_url') + self.tempest_path + self.tempest_result_file
             log.info(f"Tempest URL: {tempest_path}")
             status = requests.get(tempest_path)
             # Check logs exists on the server else skip job.
@@ -73,6 +75,10 @@ class ZuulJob:
         return self.job_builds
 
     def get_tests(self):
+        """
+        Get tests from job
+        :return:
+        """
         log_url = self.log_url + self.tempest_path + self.tempest_result_file
         log.info(f"get tests Log URL: {log_url}")
         return tempest_html_json.output(log_url)

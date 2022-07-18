@@ -16,13 +16,12 @@
 
 import os
 import re
-
-from bs4 import BeautifulSoup
-from diskcache import Cache
-import os
+import sys
 import tempfile
 
 import requests
+from bs4 import BeautifulSoup
+from diskcache import Cache
 
 cache = Cache("/tmp/skip_cache")
 cache.expire()
@@ -43,7 +42,6 @@ def get_last_build(tempest_log, tempest_dump_dir=None):
     """
     if not tempest_dump_dir:
         tempest_dump_dir = tempfile.mkdtemp(prefix="skiplist-")
-    file_name = tempest_log.split("/")[-1].strip()
     download_tempest_file(tempest_log, tempest_dump_dir)
     cache.add(tempest_dump_dir, os.path.join(tempest_dump_dir))
     return tempest_dump_dir
@@ -164,7 +162,6 @@ def get_result(log_url):
     This function returns the list of testcase name and
     status of the test case
     """
-    result = {}
     combine = zip(combine_testcases(log_url), combine_status(log_url))
     test_status = {str(x): str(y) for x, y in combine}
     return test_status
@@ -180,7 +177,8 @@ def output(log_url):
 
 
 if __name__ == "__main__":
-    log_url = "https://logserver.rdoproject.org/openstack-component-network/opendev.org/openstack/tripleo-ci/"
-    "master/periodic-tripleo-ci-centos-8-standalone-network-wallaby/bebc93c/logs/undercloud/var/log/tempest/"
-    "stestr_results.html.gz"
+    if not len(sys.argv) == 2:
+        print("Please add log url. Ex: python3 tempest_html_to_json.py <url>")
+        sys.exit(1)
+    log_url = sys.argv[1]
     print(output(log_url))

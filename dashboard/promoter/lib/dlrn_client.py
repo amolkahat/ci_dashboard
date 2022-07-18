@@ -12,8 +12,9 @@ import tempfile
 
 import dlrnapi_client
 import yaml
+from promoter.lib.dlrn_hash import (DlrnAggregateHash,
+                                    DlrnCommitDistroExtendedHash, DlrnHash)
 from promoter.models import Release
-from promoter.lib.dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
 
 try:
     # Python3 imports
@@ -27,8 +28,9 @@ except ImportError:
     JSONDecodeError = ValueError
     import urllib2 as url
 
-from .common import PromotionError
 from dlrnapi_client.rest import ApiException
+
+from .common import PromotionError
 
 
 class HashChangedError(Exception):
@@ -199,7 +201,8 @@ class DlrnClient(object):
         else:
             self.log.debug("No successful jobs for hash %s"
                            "", dlrn_hash)
-        return [{'url': job.url, 'job_id': job.job_id} for job in jobs if hasattr(job, 'job_id') and hasattr(job, 'url')]
+        return [{'url': job.url, 'job_id': job.job_id} for job in jobs if
+                hasattr(job, 'job_id') and hasattr(job, 'url')]
 
     def hashes_to_hashes(self, api_hashes, count=None, remove_duplicates=False,
                          sort=None, reverse=None):
@@ -647,16 +650,15 @@ def dump_to_dict(config, release_data, target_label):
     hash_dict = {}
     criteria = release_data['promotions']['criteria']
     for p_hash in promotions:
-        jobs = d.fetch_jobs(p_hash)
-        passed_jobs = [job['job_id'] for job in jobs]
         params = p_hash.dump_to_dict()
-        # params['passed_jobs'] = [job for job in jobs if job['job_id'] in passed_jobs]
-        params['missing_jobs'] = list(set(criteria) - set(passed_jobs))
-        if p_hash.aggregate_hash in hash_dict.keys():
-            hash_dict[p_hash.aggregate_hash].append(params)
+        if p_hash.aggregate_hash not in hash_dict.keys():
+            jobs = d.fetch_jobs(p_hash)
+            passed_jobs = [job['job_id'] for job in jobs]
+            missing_jobs = list(set(criteria) - set(passed_jobs))
+            hash_dict[p_hash.aggregate_hash] = {'missing_jobs': missing_jobs,
+                                                'hash_list': []}
         else:
-            hash_dict[p_hash.aggregate_hash] = []
-            hash_dict[p_hash.aggregate_hash].append(params)
+            hash_dict[p_hash.aggregate_hash]['hash_list'].append(params)
     return hash_dict
 
 

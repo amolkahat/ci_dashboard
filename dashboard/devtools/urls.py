@@ -1,16 +1,9 @@
-
-
-from .views import (LaunchpadBugsViewSet, ZuulJobHistoryViewSet,
-                    ZuulJobsViewSet, MirrorViewSet)
-from django.urls import include, path
-
-zuul_job_view_set = {'put': 'perform_create', 'get': 'list'}
-launchpad_view_set = {'get': 'list'}
-mirror_view_set = {'get': 'list'}
-dlrn_view_set = {'get': 'list'}
+from django.urls import path
+from devtools.views import launchpad_bugs, mirrors, zuul_jobs, job_history
 
 urlpatterns = [
-    path('jobs', ZuulJobsViewSet.as_view(zuul_job_view_set), name='jobs'),
-    path('launchpad', LaunchpadBugsViewSet.as_view(launchpad_view_set), name='rr'),
-    path('mirrors', MirrorViewSet.as_view(mirror_view_set   ), name='mirror'),
+    path('jobs/', zuul_jobs, name='jobs'),
+    path('jobs/<str:job_name>', job_history, name='zuul_history'),
+    path('launchpad/', launchpad_bugs, name='rr'),
+    path('mirrors/', mirrors, name='mirrors'),
 ]

@@ -11,7 +11,7 @@ import django
 
 django.setup()
 app = Celery('dashboard', backend="redis://localhost:6379/0",
-            broker="redis://localhost:6379/0")
+             broker="redis://localhost:6379/0")
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"

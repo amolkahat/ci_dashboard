@@ -6,3 +6,5 @@ launchpadlib
 celery
 bs4
 diskcache
+dlrnapi_client
+jinja2
