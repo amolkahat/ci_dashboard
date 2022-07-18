@@ -3,6 +3,7 @@ import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td, OuterScrollContaine
 import { Button, innerDimensions } from '@patternfly/react-core';
 import { Bullseye, Card, EmptyState, EmptyStateIcon, Spinner, Title } from '@patternfly/react-core';
 import { Table, TableHeader, TableBody } from '@patternfly/react-table';
+import { Checkbox } from '@patternfly/react-core';
 
 
 
@@ -230,121 +231,187 @@ const NestedReposTable = (props) => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ComposableTableExpandable = (props) => {
-  const repositories = props.data || [
-    { aggregate_hash: 'Node 1', commit_hash: '10', component: '2', nestedComponent: <NestedReposTable />, promote_name: <a>Link 1</a> },
-    { aggregate_hash: 'Node 2', commit_hash: '3', component: '4', promote_name: <a>Link 2</a> },
+  // In real usage, this data would come from some external source like an API via props.
+  const repositories = [
+    { name: 'one', branches: 'two', prs: 'a', workspaces: 'four', lastCommit: 'five' },
     {
-      aggregate_hash: 'Node 3',
-      commit_hash: '11',
-      component: '7',
-      promote_name: (
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-          magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-          est laborum.
-        </p>
-      ),
-      link: <a>Link 3</a>
+      name: 'parent 1',
+      branches: 'two',
+      prs: 'k',
+      workspaces: 'four',
+      lastCommit: 'five',
+      // This `details` structure is just for this example. You can drive expanded content from any kind of data.
+      details: { detailFormat: 0, detail1: 'single cell' }
     },
     {
-      aggregate_hash: 'Node 4',
-      commit_hash: '11',
-      component: '7',
-      promote_name: 'Expandable row content has no padding.',
-      link: <a>Link 4</a>,
-      noPadding: true
+      name: 'parent 2',
+      branches: 'two',
+      prs: 'b',
+      workspaces: 'four',
+      lastCommit: 'five',
+      details: {
+        detailFormat: 1,
+        detail1:
+          'Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. Lorem ipsum sit dolor. '
+      }
+    },
+    {
+      name: 'parent 3',
+      branches: '2',
+      prs: 'b',
+      workspaces: 'four',
+      lastCommit: 'five',
+      details: { detailFormat: 2, detail1: 'single cell - noPadding' }
+    },
+    {
+      name: 'parent 4',
+      branches: '2',
+      prs: 'b',
+      workspaces: 'four',
+      lastCommit: 'five',
+      details: { detailFormat: 3, detail1: 'single cell - fullWidth & noPadding' }
+    },
+    {
+      name: 'parent 5',
+      branches: '2',
+      prs: 'b',
+      workspaces: 'four',
+      lastCommit: 'five',
+      details: {
+        detailFormat: 0,
+        detail1: "spans 'Repositories and 'Branches'",
+        detail2: "spans 'Pull requests' and 'Workspaces', and 'Last commit'"
+      }
+    },
+    {
+      name: 'parent 6',
+      branches: '2',
+      prs: 'b',
+      workspaces: 'four',
+      lastCommit: 'five',
+      details: {
+        detailFormat: 1,
+        detail1: "fullWidth, spans the collapsible column and 'Repositories'",
+        detail2: "fullWidth, spans 'Branches' and 'Pull requests'",
+        detail3: "fullWidth, spans 'Workspaces' and 'Last commit'"
+      }
     }
   ];
 
   const columnNames = {
-    aggregate_hash: 'Aggregate Hash',
-    commit_hash: 'Commit Hash',
-    component: 'Component',
-    promote_name: 'Label Name',
-    repo_url: 'Repo URL'
+    name: 'Repositories',
+    branches: 'Branches',
+    prs: 'Pull requests',
+    workspaces: 'Workspaces',
+    lastCommit: 'Last commit'
   };
+
   // In this example, expanded rows are tracked by the repo names from each row. This could be any unique identifier.
   // This is to prevent state from being based on row order index in case we later add sorting.
   // Note that this behavior is very similar to selection state.
-  const initialExpandedRepoNames = repositories.filter(repo => !!repo.nestedComponent).map(repo => repo.aggregate_hash); // Default to all expanded
+  const initialExpandedRepoNames = repositories.filter(repo => !!repo.details).map(repo => repo.name); // Default to all expanded
   const [expandedRepoNames, setExpandedRepoNames] = React.useState(initialExpandedRepoNames);
-  const setRepoExpanded = (repo, isExpanding) =>
+  const setRepoExpanded = (repo, isExpanding = true) =>
     setExpandedRepoNames(prevExpanded => {
       const otherExpandedRepoNames = prevExpanded.filter(r => r !== repo.name);
       return isExpanding ? [...otherExpandedRepoNames, repo.name] : otherExpandedRepoNames;
     });
   const isRepoExpanded = (repo) => expandedRepoNames.includes(repo.name);
 
-  const defaultActions = (repo) => [
-    {
-      title: 'Some action',
-      onClick: () => console.log(`clicked on Some action, on row ${repo.name}`)
-    },
-    {
-      title: <a href="https://www.patternfly.org">Link action</a>
-    },
-    {
-      isSeparator: true
-    },
-    {
-      title: 'Third action',
-      onClick: () => console.log(`clicked on Third action, on row ${repo.name}`)
-    }
-  ];
+  const [isExampleCompact, setIsExampleCompact] = React.useState(true);
 
   return (
-    <TableComposable variant='compact' aria-label="Simple table">
-      <Thead>
-        <Tr>
-          <Td />
-          <Th>{columnNames.aggregate_hash}</Th>
-          <Th>{columnNames.commit_hash}</Th>
-          <Th>{columnNames.component}</Th>
-          <Th>{columnNames.promote_name}</Th>
-          <Th>{columnNames.repo_url}</Th>
-        </Tr>
-      </Thead>
-      {repositories.map((repo, rowIndex) => (
-        <Tbody key={repo.repo_hash+repo.timestamp} isExpanded={isRepoExpanded(repo)}>
+    <React.Fragment>
+      <Checkbox
+        label="Compact"
+        isChecked={isExampleCompact}
+        onChange={checked => setIsExampleCompact(checked)}
+        aria-label="toggle compact variation"
+        id="toggle-compact"
+        name="toggle-compact"
+      />
+      <TableComposable aria-label="Expandable table" variant='compact'>
+        <Thead>
           <Tr>
-            <Td
-              expand={
-                repo.nestedComponent
-                  ? {
-                      rowIndex,
-                      isExpanded: isRepoExpanded(repo),
-                      onToggle: () => setRepoExpanded(repo, !isRepoExpanded(repo))
-                    }
-                  : undefined
-              }
-            />
-            <Td dataLabel={columnNames.aggregate_hash}>{repo.aggregate_hash}</Td>
-            <Td dataLabel={columnNames.commit_hash}>{repo.commit_hash}</Td>
-            <Td dataLabel={columnNames.component}>{repo.component}</Td>
-            <Td dataLabel={columnNames.promote_name}>{repo.promote_name}</Td>
-            <Td dataLabel={columnNames.repo_url}>
-              <ActionsColumn items={defaultActions(repo)} />
-            </Td>
+            <Th />
+            <Th width={25}>{columnNames.name}</Th>
+            <Th width={10}>{columnNames.branches}</Th>
+            <Th width={15}>{columnNames.prs}</Th>
+            <Th width={30}>{columnNames.workspaces}</Th>
+            <Th width={10}>{columnNames.lastCommit}</Th>
           </Tr>
-          {repo.nestedComponent ? (
-            <Tr isExpanded={isRepoExpanded(repo)}>
-              <Td
-                noPadding={repo.noPadding}
-                dataLabel={`${columnNames.name} expended`}
-                colSpan={Object.keys(columnNames).length + 1}
-              >
-                <ExpandableRowContent>{repo.nestedComponent}</ExpandableRowContent>
-              </Td>
-            </Tr>
-          ) : null}
-        </Tbody>
-      ))}
-    </TableComposable>
+        </Thead>
+        {repositories.map((repo, rowIndex) => {
+          // Some arbitrary examples of how you could customize the child row based on your needs
+          let childIsFullWidth = false;
+          let childHasNoPadding = false;
+          let detail1Colspan = 1;
+          let detail2Colspan = 1;
+          let detail3Colspan = 1;
+          if (repo.details) {
+            const { detail1, detail2, detail3, detailFormat } = repo.details;
+            const numColumns = 5;
+            childIsFullWidth = [1, 3].includes(detailFormat);
+            childHasNoPadding = [2, 3].includes(detailFormat);
+            if (detail1 && !detail2 && !detail3) {
+              detail1Colspan = !childIsFullWidth ? numColumns : numColumns + 1; // Account for toggle column
+            } else if (detail1 && detail2 && !detail3) {
+              detail1Colspan = 2;
+              detail2Colspan = !childIsFullWidth ? 3 : 4;
+            } else if (detail1 && detail2 && detail3) {
+              detail1Colspan = 2;
+              detail2Colspan = 2;
+              detail3Colspan = !childIsFullWidth ? 1 : 2;
+            }
+          }
+          return (
+            <Tbody key={repo.name} isExpanded={isRepoExpanded(repo)}>
+              <Tr>
+                <Td
+                  expand={
+                    repo.details
+                      ? {
+                          rowIndex,
+                          isExpanded: isRepoExpanded(repo),
+                          onToggle: () => setRepoExpanded(repo, !isRepoExpanded(repo))
+                        }
+                      : undefined
+                  }
+                />
+                <Td dataLabel={columnNames.name}>{repo.name}</Td>
+                <Td dataLabel={columnNames.branches}>{repo.branches}</Td>
+                <Td dataLabel={columnNames.prs}>{repo.prs}</Td>
+                <Td dataLabel={columnNames.workspaces}>{repo.workspaces}</Td>
+                <Td dataLabel={columnNames.lastCommit}>{repo.lastCommit}</Td>
+              </Tr>
+              {repo.details ? (
+                <Tr isExpanded={isRepoExpanded(repo)}>
+                  {!childIsFullWidth ? <Td /> : null}
+                  {repo.details.detail1 ? (
+                    <Td dataLabel="Repo detail 1" noPadding={childHasNoPadding} colSpan={detail1Colspan}>
+                      <ExpandableRowContent>{repo.details.detail1}</ExpandableRowContent>
+                    </Td>
+                  ) : null}
+                  {repo.details.detail2 ? (
+                    <Td dataLabel="Repo detail 2" noPadding={childHasNoPadding} colSpan={detail2Colspan}>
+                      <ExpandableRowContent>{repo.details.detail2}</ExpandableRowContent>
+                    </Td>
+                  ) : null}
+                  {repo.details.detail3 ? (
+                    <Td dataLabel="Repo detail 3" noPadding={childHasNoPadding} colSpan={detail3Colspan}>
+                      <ExpandableRowContent>{repo.details.detail3}</ExpandableRowContent>
+                    </Td>
+                  ) : null}
+                </Tr>
+              ) : null}
+            </Tbody>
+          );
+        })}
+      </TableComposable>
+    </React.Fragment>
   );
 };
-
 
 export default {DynamicTable, LaunchpadTableStriped, LoadingStateDemo, ComposableTableStriped, ComposableTableExpandable};

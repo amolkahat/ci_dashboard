@@ -1,11 +1,11 @@
 // import Component from the react module
 import { Alert, Button, InputGroup, TextInput } from "@patternfly/react-core";
 import React, { Component, useEffect, useState } from "react";
-import DisclosureExpandableSection from "../components/JobExpandSection";
+import DisclosureExpandableSection from "../components/ExpandSection";
 import { Panel, PanelFooter, PanelHeader, PanelMain, PanelMainBody } from '@patternfly/react-core';
 import axios from "axios";
 import BasicPanel from "../components/Panel";
-import JobExpandableSection from "../components/JobExpandSection";
+import JobExpandableSection from "../components/ExpandSection";
 import { CardBasic } from "../components/CardTemplates";
 import {TempestTabs} from "../components/Tabs";
 import { Tabs, Tab, TabTitleText, TabTitleIcon} from '@patternfly/react-core';
@@ -100,7 +100,7 @@ export const TempestSkip = (props) =>{
                         type="text"
                         key="Zuul_job"
                         value={job_url}
-                        onChange={onSetJobUrl}
+                        onChange={(e) => setjob_url(e)}
                         aria-label="ZuuTruel job name"
                         tabIndex={1}/>
             <Button id="zuul_job_button"

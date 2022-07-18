@@ -44,4 +44,58 @@ const JobExpandableSection =  (props) => {
     )
 }
 
-export default JobExpandableSection;
+
+export const HashExpandableSection =  (props) => {
+  const dataDict = props.dict;
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [activeItem, setActiveItem] = useState(0)
+
+  function onToggle(isExpanded){
+    setIsExpanded(!isExpanded)
+  }
+
+  const dispay = Object.keys(dataDict).map((d, key) => {
+
+    function onExpand(result){
+      setActiveItem(result.itemId)
+    }
+    return (
+      <ExpandableSection
+        toggleText={isExpanded ? d : d}
+        onToggle={() => onToggle(isExpanded)}
+        isExpanded={isExpanded}
+        onExpand={e=>onExpand(e)}
+        displaySize='large'
+        itemId={key}
+      >
+        {key} {d} {console.log(dataDict[d])}
+      </ExpandableSection>
+    )
+  })
+return (
+  <div>
+    {dispay}
+  </div>
+)
+
+// return (
+//     <ExpandableSection
+//       toggleText={isExpanded ? "Expanded" : "Not Expanded"}
+//       onToggle={() => onToggle(isExpanded)}
+//       isExpanded={isExpanded}
+//       displaySize="large"
+//     >
+//       Testing
+//       {Object.keys(dict).forEach((d, key) => {return <div>{d}</div>}
+//       )}
+//       {/* <DynamicTable 
+//         head={[ //  "job_name_id", 
+//               "tests_log_url", 
+//                // "duration",  "end_time", "event_timestamp", 
+//                 "project", "pipeline", "result", "voting", "job_tests"]}
+//         data={[jobHistory]}/> */}
+//     </ExpandableSection>
+//   )
+}
+
+export default {JobExpandableSection, HashExpandableSection};
