@@ -1,6 +1,7 @@
-from django.test import TestCase, Client
-import redis
 import json
+
+import redis
+from django.test import Client, TestCase
 
 client = Client()
 

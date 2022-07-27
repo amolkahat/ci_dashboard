@@ -1,7 +1,7 @@
 """
 Serializers
 """
-from devtools.models import LaunchpadBugs, ZuulJob, ZuulJobHistory
+from devtools.models import GerritModel, LaunchpadBugs, ZuulJob, ZuulJobHistory
 from rest_framework import serializers, viewsets
 
 
@@ -69,3 +69,12 @@ class MirrorSerializer(serializers.Serializer):
     def create(self, validated_data):
         for field, value in validated_data.items():
             setattr(self, field, value)
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    """
+    Review List serializer
+    """
+    class Meta:
+        model = GerritModel
+        fields = "__all__"
