@@ -6,6 +6,7 @@ import logging
 import redis
 from devtools.lib.launchpad import get_bugs
 from devtools.lib.mirror_sync_status import get_rdo_mirrors
+from devtools.lib.review_list import get_gerrit_meta
 from devtools.models import ZuulJob
 from devtools.serializers import ReviewListSerializer, ZuulJobWriteSerializer
 from django.conf import settings
@@ -14,7 +15,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from pygerrit2 import Anonymous, GerritRestAPI
 from rest_framework import status as st
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
@@ -25,13 +25,6 @@ from .models import GerritModel
 logger = logging.getLogger(__name__)
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 redis_client = redis.Redis()
-
-CONFIG = {
-    "rdoproject": "https://review.rdoproject.org/r/",
-    "opendev": "https://review.opendev.org/",
-    "code.engineering.redhat.com":
-        "https://code.engineering.redhat.com/gerrit/"
-}
 
 
 def url_is_valid(url):
@@ -46,27 +39,6 @@ def url_is_valid(url):
         return False
 
 
-def get_gerrit_meta(url):
-    """
-    Get gerrit review Metadata
-    """
-    full_url = url
-    if 'rdoproject' in url:
-        full_url = CONFIG['rdoproject']
-    elif 'opendev' in url:
-        full_url = CONFIG['opendev']
-    elif 'code.engineering.redhat.com' in url:
-        full_url = CONFIG['code.engineering.redhat.com']
-    if url.endswith("/"):
-        change_id = url.split("/")[-2].strip()
-    else:
-        change_id = url.split("/")[-1].strip()
-    auth = Anonymous()
-    rest = GerritRestAPI(url=full_url, auth=auth, verify=False)
-    changes = rest.get(f"/changes/{change_id}")
-    return changes
-
-
 @api_view(['GET', 'POST'])
 def review_list(request):
     """
@@ -74,7 +46,8 @@ def review_list(request):
     if request.method == "GET":
         data = GerritModel.objects.all()
         rl = ReviewListSerializer(data, many=True)
-        return JsonResponse(rl.data, safe=False, status=st.HTTP_200_OK)
+        return JsonResponse(rl.data, safe=False,
+                            status=st.HTTP_200_OK)
 
     elif request.method == "POST":
         return_data = {}

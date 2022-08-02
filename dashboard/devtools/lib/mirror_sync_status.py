@@ -65,6 +65,7 @@ CENTOS_9_SLUG = "centos-stream/9-stream/COMPOSE_ID"
 
 # Get CentOS compose ID
 
+# TODO (akahat) Fix centos mirror status
 
 class CentosMirror:
 
@@ -112,7 +113,10 @@ class RDOMirror:
 
     def __make_request(self, url, **headers):
         data = requests.get(url, headers=headers)
-        return data
+        if data.status_code == 200:
+            return data
+        else:
+            return data
 
     # Get dlrn md5 hash
     def get_delorean_md5_hash(self,
@@ -170,7 +174,8 @@ def get_rdo_mirrors(release, distro):
     """
     mirror_list = {release: []}
     rdo_mirror = RDOMirror(release, distro)
-    if rdo_mirror.verify_url():
+    url_data = rdo_mirror.verify_url()
+    if url_data.status_code == 200:
         md5_sum = rdo_mirror.get_delorean_md5_hash().text
         for mirror in target_mirrors:
             rdo_proxy_url = rdo_mirror.get_rdo_proxy_url(mirror, distro,

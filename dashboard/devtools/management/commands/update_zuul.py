@@ -1,7 +1,6 @@
 import requests
-from devtools.lib.launchpad import get_bugs
 from devtools.lib.zuul import ZUUL_LIST
-from devtools.models import LaunchpadBugs, ZuulJob, ZuulJobHistory
+from devtools.models import ZuulJob, ZuulJobHistory
 from django.core.management.base import BaseCommand
 
 
@@ -70,20 +69,6 @@ def update_zuul_job_history():
                 except Exception as e:
                     print(e)
 
-
-def get_launchpad_bugs():
-    """
-    Get launchpad bugs
-    """
-    status = ['New', 'Triaged', 'In Progress', 'Confirmed', 'Fix Committed']
-    bugs = get_bugs(status=status)
-    for bug in bugs:
-        LaunchpadBugs(id=bug.bug.id,
-                      status=bug.status,
-                      tags=bug.bug.tags,
-                      title=bug.bug.title,
-                      link=bug.web_link).save()
-
     # TODO remove old bugs
 
 
@@ -97,5 +82,13 @@ class Command(BaseCommand):
         """
         Call custom command
         """
+
+        # TODO get job history,  failure rate, failure reason
+        # TODO get pipeline, pipeline history
+
+        print(args)
+        print(kwargs)
         # update_zuul_job_history()
-        get_launchpad_bugs()
+        # get_launchpad_bugs()
+
+        print("Update Zuul")
