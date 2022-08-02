@@ -1,7 +1,10 @@
 // import Component from the react module
 import React, { Component, useState, useEffect } from "react";
 import axios from 'axios';
-import { Alert, ExpandableSection, FlexItem, Grid, GridItem, Label, Flex } from "@patternfly/react-core";
+import { Alert, ExpandableSection, 
+         FlexItem, Grid, GridItem, Label, Flex, 
+         Toolbar, ToolbarItem, ToolbarContent, ClipboardCopy, 
+         ClipboardCopyVariant } from "@patternfly/react-core";
 import { CardBasic } from "../components/CardTemplates";
 import BasicSpinner from "../components/Spinner";
 
@@ -69,9 +72,40 @@ export const Promoter = props => {
         }
     }
 
+    const PromoteToolbar = (props) => {
+        const ProjecText = props.missing_jobs.map(key => {
+        return `
+        - ${key}:
+            vars:
+              force_periodic: true
+              featureset_override: 
+                dlrn_hash_tag: ${props.hash}
+        `}).join(' ')
+        
+        return <div>
+            <Toolbar id='promoter-toolbar'>
+                <ToolbarContent>
+                    <ToolbarItem>Missing Jobs</ToolbarItem>
+                    <ToolbarItem variant="separator"/>
+                    <ToolbarItem><Button variant="primary">Promote hash</Button></ToolbarItem>
+                    <ToolbarItem variant="separator"/>
+                    <ToolbarItem>
+                    <ClipboardCopy isCode hoverTip="Copy" clickTip="Copied" variant={ClipboardCopyVariant.expansion}>
+                    {`- project:
+    check:
+     jobs:
+                            ${ProjecText.toString()}
+                    `}
+                    </ClipboardCopy>
+                    </ToolbarItem>
+                </ToolbarContent>
+            </Toolbar>
+        </div>
+    }
+
     const JobList = (props) => {
         return <div>
-                <CardBasic header={"Missing Jobs"}>
+                <CardBasic header={<PromoteToolbar missing_jobs={props.missing_jobs} hash={props.hash}/>}>
                     <List component={ListComponent.ol} type={OrderType.number}>
                         {props.missing_jobs.length !== 0 ? props.missing_jobs.map(item => (
                             <ListItem key={item}>{item}</ListItem>
@@ -125,7 +159,7 @@ export const Promoter = props => {
 
                 <Grid hasGutter>
                     <GridItem span={5}>
-                        <JobList missing_jobs={value[1].missing_jobs}/>
+                        <JobList missing_jobs={value[1].missing_jobs} hash={value[0]}/>
                     </GridItem>
                     <GridItem span={7}>
                         <OuterScrollContainer>
