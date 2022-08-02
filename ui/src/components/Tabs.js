@@ -10,8 +10,11 @@ import { CardBasic } from './CardTemplates';
 import {LaunchpadTableStriped} from './Table';
 import axios from 'axios';
 import { Caption, TableComposable, Tbody, Thead, Tr, Th, Td } from '@patternfly/react-table';
-import { ReleaseDistroDropdown } from './Dropdown';
+import { ReleaseToolbar } from './Dropdown';
 import BasicSpinner from './Spinner';
+import ReviewList from '../apps/ReviewList';
+import { useSelector, useDispatch } from 'react-redux';
+
 
 
 const RRToolsTab = (props) => {
@@ -19,10 +22,12 @@ const RRToolsTab = (props) => {
   const [error, seterror] = useState("")
   const [launchpad, setlaunchpad] = useState([])
   const [mirrors, setMirrors] = useState([])
-  const [release, setRelease] = useState("master")
-  const [distro, setDistro] = useState("centos9")
   const [loading, setLoading] = useState(true)
-    // Toggle currently active tab
+
+  const relDistro = useSelector((state)=> state.release)
+  const distro = relDistro.distro
+  const release = relDistro.release
+
   function handleTabClick(event, tabIndex){
       setactiveTabKey(tabIndex);
     };
@@ -39,19 +44,21 @@ const RRToolsTab = (props) => {
     .catch(err => seterror(err))
   }
 
-  function fetchMirrors(){
+  async function fetchMirrors(){
     seterror('')
-    axios
-    .get(`http://localhost:8000/api/mirrors/?release=${release}&distro=${distro}`)
-    .then(res => {
-      setMirrors(res.data)
+    try{
+      const resp = await axios
+      .get(`http://localhost:8000/api/mirrors/?release=${release}&distro=${distro}`)
+
+      setMirrors(resp.data)
       setLoading(false)
-    })
-    .catch(err => seterror(err.response.data))
+    }catch(error){
+      seterror(error.response)
+    }
   }
 
   const MirrorTable = (props) => {
-      return <TableComposable 
+      return <TableComposable
                 aria-label='Mirrors Table'
                 variant='compact'
               >
@@ -78,7 +85,7 @@ const RRToolsTab = (props) => {
   }
 
   return (
-      <CardBasic title={error}>
+      <CardBasic header={error.message ? <Alert variant='danger' title={error.message}/>: ""}>
       <Tabs activeKey={activeTabKey} onSelect={handleTabClick}
             aria-label="Tabs in the icons and text example">
 
@@ -88,15 +95,15 @@ const RRToolsTab = (props) => {
               <TabTitleText>Launchpad</TabTitleText>{' '}
             </>
           } >
-          <LaunchpadTableStriped repos={launchpad} title="Launchpad Bugs"/>
+          {error ? <Alert variant='danger' title={error.message}/> :  loading ? <BasicSpinner/>: <LaunchpadTableStriped repos={launchpad} title="Launchpad Bugs"/>}
         </Tab>
         <Tab eventKey={2} title={
             <>
               <TabTitleIcon><BoxIcon /></TabTitleIcon>{' '}
-              <TabTitleText>Bugzilla</TabTitleText>{' '}
+              <TabTitleText>Review List</TabTitleText>{' '}
             </>
           } >
-          Bugzilla
+          <ReviewList/>
         </Tab>
         <Tab eventKey={3} title={
             <>
@@ -112,13 +119,9 @@ const RRToolsTab = (props) => {
               <TabTitleText>Mirrors</TabTitleText>{' '}
             </>
           } >
-            <ReleaseDistroDropdown buttonOnClick={fetchMirrors}
-                                   release={release}
-                                   distro={distro}
-                                   setRelease={setRelease} 
-                                   setDistro={setDistro}
-                                   buttonTitle="Get Mirrors"/>
-             {error ? <Alert variant='danger' title={error}/> :  loading ? <BasicSpinner/>: <MirrorTable/>}
+            <ReleaseToolbar buttonOnClick={fetchMirrors}
+                        buttonTitle="Get Mirrors"/>
+             {error ? <Alert variant='danger' title={error.message}/> :  loading ? <BasicSpinner/>: <MirrorTable/>}
         </Tab>
         <Tab eventKey={5} title={
             <>

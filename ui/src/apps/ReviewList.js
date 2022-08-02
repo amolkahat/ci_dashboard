@@ -49,7 +49,6 @@ class ReviewList extends Component {
                                  newItem:{'review_url': ''},
                                  loading: false }))
     .catch(err => this.setState({error: err}));
-    console.log(this.state.taskList)
   };
 
 
@@ -66,18 +65,12 @@ class ReviewList extends Component {
     }
   };
 
-  // Delete item
-  handleDelete = (item) => {
-    axios
-    .delete(`http://localhost:8000/api/reviews/${item}/`)
-    .then((res) => this.refreshList());
-  };
-
+  // Done item
   handleDone = (item) => {
     axios
-    .delete(`http://localhost:8000/api/reviews/${item}/`)
+    .post(`http://localhost:8000/api/reviews/${item}`)
     .then((res) => this.refreshList());
-  }
+  };
 
   handleOnChange(event) {
     this.setState({
@@ -88,9 +81,9 @@ class ReviewList extends Component {
   render() {
     return (
       <div>
-        {this.state.error &&
-          <BasicPanel><Alert variant="danger" title={this.state.error.message}/> </BasicPanel>}
-        <BasicPanel>
+        <BasicPanel header={this.state.error && <Alert variant="danger" title={this.state.error.response.data.msg ?
+                                                                               this.state.error.response.data.msg:
+                                                                               this.state.error.message}/>}>
           <InputGroup>
             <TextInput value={this.state.newItem.review_url}
                        name="new_review" id="new_review"
@@ -103,7 +96,7 @@ class ReviewList extends Component {
             </Button>
           </InputGroup>
         </BasicPanel>
-        {this.state.loading ? <BasicSpinner/> : <ComposableTableStriped repos={this.state.taskList} done={this.handleDone} delete={this.handleDelete}/>}
+        {this.state.loading ? <BasicSpinner/> : <ComposableTableStriped repos={this.state.taskList} done={this.handleDone}/>}
         </div>
     );
   }

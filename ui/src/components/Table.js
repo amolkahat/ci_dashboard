@@ -1,10 +1,10 @@
 import React from 'react';
 import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td, OuterScrollContainer, ActionsColumn, ExpandableRowContent,TableText } from '@patternfly/react-table';
 import { Button, innerDimensions } from '@patternfly/react-core';
-import { Bullseye, Card, EmptyState, EmptyStateIcon, Spinner, Title } from '@patternfly/react-core';
+import { Bullseye, Card, EmptyState, EmptyStateIcon, Spinner, Title, EmptyStateVariant, EmptyStateBody, } from '@patternfly/react-core';
 import { Table, TableHeader, TableBody } from '@patternfly/react-table';
 import { Checkbox } from '@patternfly/react-core';
-
+import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 
 
 export const DynamicTable = (props) => {
@@ -85,7 +85,7 @@ export const LaunchpadTableStriped = (props) => {
                 <Td dataLabel={columnNames.id}><a href={repo.id}>{repo.id}</a></Td>
                 <Td dataLabel={columnNames.status}>{repo.title}</Td>
                 <Td dataLabel={columnNames.link}>{repo.status}</Td>
-                <Td dataLabel={columnNames.tag}>{repo.tags}</Td>
+                <Td dataLabel={columnNames.tags}>{repo.tag.toString()}</Td>
             </Tr>
             ))}
         </Tbody>
@@ -94,15 +94,7 @@ export const LaunchpadTableStriped = (props) => {
 }
 
 export const ComposableTableStriped = (props) => {
-  // In real usage, this data would come from some external source like an API via props.
   const repositories = props.repos;
-//   [
-//     { name: 'Repository 1', branches: 10, prs: 25, workspaces: 5, lastCommit: '2 days ago' },
-//     { name: 'Repository 2', branches: 10, prs: 25, workspaces: 5, lastCommit: '2 days ago' },
-//     { name: 'Repository 3', branches: 10, prs: 25, workspaces: 5, lastCommit: '2 days ago' },
-//     { name: 'Repository 4', branches: 10, prs: 25, workspaces: 5, lastCommit: '2 days ago' }
-//   ];
-
   const columnNames = {
     id: 'ID',
     owner: 'Owner',
@@ -128,7 +120,7 @@ export const ComposableTableStriped = (props) => {
             </Tr>
         </Thead>
         <Tbody>
-            {repositories.map(repo => (
+            {repositories.length > 0 ? repositories.map(repo => (
             <Tr key={repo.id}>
                 <Td dataLabel={columnNames.review_url}><a href={repo.review_url}>{repo.review_url.split("/+/")[1]}</a></Td>
                 <Td dataLabel={columnNames.subject}>{repo.subject}</Td>
@@ -136,10 +128,21 @@ export const ComposableTableStriped = (props) => {
                 <Td dataLabel={columnNames.owner}>{repo.review_owner}</Td>
                 <Td dataLabel={columnNames.status}>{repo.review_status}</Td>
                 <Td isActionCell><TableText>
-                  <Button variant="secondary">{repo.singleAction}</Button>
+                  <Button variant="secondary" onClick={() => props.done(repo.id)} isAriaDisabled={repo.completed}> Done </Button>
                 </TableText></Td>
             </Tr>
-            ))}
+            )): <Td colSpan={8}>
+            <Bullseye>
+                <EmptyState variant={EmptyStateVariant.small}>
+                <EmptyStateIcon icon={SearchIcon} />
+                <Title headingLevel="h2" size="lg">
+                    No results found
+                </Title>
+                <EmptyStateBody>Clear all filters and try again.</EmptyStateBody>
+                <Button variant="link">Clear all filters</Button>
+                </EmptyState>
+            </Bullseye>
+            </Td>}
         </Tbody>
         </TableComposable>
     </OuterScrollContainer>

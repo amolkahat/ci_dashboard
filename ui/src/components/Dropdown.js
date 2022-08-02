@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Button, Dropdown, DropdownToggle, DropdownItem} from '@patternfly/react-core';
 import { CardBasic } from './CardTemplates';
 import axios from 'axios';
+import { Toolbar, ToolbarItem, ToolbarContent } from '@patternfly/react-core';
+
+import { useSelector, useDispatch } from 'react-redux';
+import allActions from '../Actions';
 
 
 export const DropdownBasic  = (props) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dropdownTitle, setDropdownTitle] = React.useState(props.title);
-  const releases = props.release || ['master'];
+  const releases = props.release;
 
   const onToggle = (isOpen) => {
     setIsOpen(isOpen);
@@ -32,7 +36,8 @@ export const DropdownBasic  = (props) => {
 
   return (
     <Dropdown
-      onSelect={e =>onSelect(e)}
+      title={props.id}
+      onChange={e =>onSelect(e)}
       toggle={
         <DropdownToggle id="toggle-basic" onToggle={onToggle}>
           {dropdownTitle}
@@ -45,52 +50,103 @@ export const DropdownBasic  = (props) => {
 };
 
 
-export class ReleaseDistroDropdown extends React.Component {
-  constructor(props){
-    super(props)
-    this.state = {
-      releaseList: [],
-      releaseData: {},
-      distroList: [],
-      error: "",
-      release: this.props.release
-    }
+export const ReleaseToolbar = (props) => {
 
-  }
+  const relDistro = useSelector((state)=> state.release)
+  const [releaseList, setReleaseList] = useState([])
+  const [distroList, setDistroList] = useState([])
+  const [error, setError] = useState("")
+  const [release, setRelease] = useState(relDistro.release || " ")
+  const [distro, setDistro] = useState(relDistro.distro || " ")
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpenDistro, setIsOpenDistro] = React.useState(false);
 
-  componentDidMount(){
-    this.getRelease()
-  }
+  const dispath = useDispatch()
 
-  getRelease = () => {
-    const releaseList = []
+  useEffect(() => {
     axios
-    .get("http://localhost:8000/api/releases/")
-    .then(res => {
-       Object.keys(res.data).map((key, i) => {
-            releaseList.push(key)
-       })
-       this.setState({releaseData: res.data, releaseList: releaseList})
+    .get('http://localhost:8000/api/releases/')
+    .then(response => {
+      setReleaseList(response.data)
+    });
+  }, [release])
+
+  const changeState = (e) =>{
+    setRelease(e.target.text)
+    dispath(allActions.setRelease(e.target.text))
+    setIsOpen(!isOpen)
+    axios
+    .get('http://localhost:8000/api/releases/',
+          {params: {"release":  e.target.text }})
+    .then(response => {
+      setDistroList(response.data)
     })
-    .catch(err=>this.setState({error: err}))
-    console.log("RElease List", this.state.releaseList)
+    .catch(err => setError(err));
   }
 
-  render(){
-    return (
-      <CardBasic header="Select Mirrors ">
-        <DropdownBasic release={this.state.releaseList} 
-                        title='Select Release'
-                        setRelease={this.props.setRelease}>
-        </DropdownBasic> {' '}{console.log(this.state.releaseData[this.state.release])}
-        <DropdownBasic release={this.state.releaseData[this.state.release]}
-                        title='Select Distro'
-                        setRelease={this.props.setDistro}
-                        //  onSelect={() => fetchMirrors}
-                        >
-        </DropdownBasic> {' '}
-        <Button onClick={this.props.buttonOnClick}> {this.props.buttonTitle} </Button>
-      </CardBasic>
-    )
-  }
+
+  const onToggle = (isOpen) => {
+    setIsOpen(isOpen);
+  };
+
+  const onToggleD = (isOpen) => {
+    setIsOpenDistro(isOpen);
+  };
+
+  const onFocus = () => {
+    const element = document.getElementById('toggle-basic');
+    element.focus();
+  };
+
+  const onChangeDistro = (e) => {
+    setDistro(e.target.text)
+    dispath(allActions.setDistro(distro))
+    setIsOpenDistro(false);
+    onFocus();
+  };
+
+  const dropdownReleaseItems = Array.isArray(releaseList) && releaseList.map(item => {
+      return <DropdownItem key={item}>{item}</DropdownItem>});
+
+  const dropdownDistroItems = Array.isArray(distroList) && distroList.map(item => {
+    return <DropdownItem key={item}>{item}</DropdownItem>
+  })
+
+  return (
+      <Toolbar id="toolbar-items">
+        <ToolbarContent>
+          <ToolbarItem>Release</ToolbarItem>
+        <ToolbarItem>
+          <Dropdown
+            title="release"
+            isOpen={isOpen}
+            onSelect={(e) => changeState(e)}
+            toggle={
+                      <DropdownToggle id="toggle-basic" onToggle={onToggle}>
+                        {release? release: "Select Release"}
+                      </DropdownToggle>
+                    }
+            dropdownItems={dropdownReleaseItems}
+          />
+        </ToolbarItem>
+        <ToolbarItem variant="separator" />
+        <ToolbarItem>Distro</ToolbarItem>
+        <ToolbarItem>
+          <Dropdown
+            title="distro"
+            isOpen={isOpenDistro}
+            onSelect={e => onChangeDistro(e)}
+            toggle={
+                      <DropdownToggle id="toggle-basic" onToggle={onToggleD}>
+                        {distro? distro: "Select Distro"}
+                      </DropdownToggle>
+                    }
+            dropdownItems={dropdownDistroItems}
+          />
+        </ToolbarItem>
+        <ToolbarItem variant="separator" />
+        <Button onClick={props.buttonOnClick}> {props.buttonTitle} </Button>
+      </ToolbarContent>
+      </Toolbar>
+  );
 }

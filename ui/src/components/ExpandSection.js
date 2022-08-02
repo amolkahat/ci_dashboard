@@ -3,8 +3,7 @@ import { Button, ExpandableSection } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import {CardBasic} from './CardTemplates';
 import axios from 'axios';
-import {DynamicTable, LoadingStateDemo} from './Table';
-import { RedditSquareIcon, SyncAltIcon } from '@patternfly/react-icons'
+import {DynamicTable} from './Table';
 
 const JobExpandableSection =  (props) => {
     const dict = props.dict;
@@ -34,10 +33,10 @@ const JobExpandableSection =  (props) => {
         isExpanded={isExpanded}
         displaySize="large"
       >
-        <DynamicTable 
-          head={[ //  "job_name_id", 
-                "tests_log_url", 
-                 // "duration",  "end_time", "event_timestamp", 
+        <DynamicTable
+          head={[ //  "job_name_id",
+                "tests_log_url",
+                 // "duration",  "end_time", "event_timestamp",
                   "project", "pipeline", "result", "voting", "job_tests"]}
           data={[jobHistory]}/>
       </ExpandableSection>
@@ -55,10 +54,10 @@ export const HashExpandableSection =  (props) => {
   }
 
   const dispay = Object.keys(dataDict).map((d, key) => {
-
     function onExpand(result){
       setActiveItem(result.itemId)
     }
+
     return (
       <ExpandableSection
         toggleText={isExpanded ? d : d}
@@ -72,30 +71,12 @@ export const HashExpandableSection =  (props) => {
       </ExpandableSection>
     )
   })
-return (
-  <div>
-    {dispay}
-  </div>
-)
-
-// return (
-//     <ExpandableSection
-//       toggleText={isExpanded ? "Expanded" : "Not Expanded"}
-//       onToggle={() => onToggle(isExpanded)}
-//       isExpanded={isExpanded}
-//       displaySize="large"
-//     >
-//       Testing
-//       {Object.keys(dict).forEach((d, key) => {return <div>{d}</div>}
-//       )}
-//       {/* <DynamicTable 
-//         head={[ //  "job_name_id", 
-//               "tests_log_url", 
-//                // "duration",  "end_time", "event_timestamp", 
-//                 "project", "pipeline", "result", "voting", "job_tests"]}
-//         data={[jobHistory]}/> */}
-//     </ExpandableSection>
-//   )
+  
+  return (
+    <div>
+      {dispay}
+    </div>
+  )
 }
 
 export default {JobExpandableSection, HashExpandableSection};
