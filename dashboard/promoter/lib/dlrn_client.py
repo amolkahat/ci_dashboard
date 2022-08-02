@@ -14,7 +14,8 @@ import dlrnapi_client
 import yaml
 from promoter.lib.dlrn_hash import (DlrnAggregateHash,
                                     DlrnCommitDistroExtendedHash, DlrnHash)
-from promoter.models import Release
+
+# from promoter.models import Release
 
 try:
     # Python3 imports
@@ -23,14 +24,13 @@ try:
     from urllib import request as url
 except ImportError:
     # Python 2 imports
-    import ConfigParser as ini_parser  # noqa N813
+    import ConfigParser as ini_parser  # noqa: N813
 
     JSONDecodeError = ValueError
     import urllib2 as url
 
 from dlrnapi_client.rest import ApiException
-
-from .common import PromotionError
+from promoter.lib.common import PromotionError
 
 
 class HashChangedError(Exception):
@@ -47,7 +47,8 @@ class DlrnClientConfig(object):
     """
 
     def __init__(self, **kwargs):
-        args = ['dlrnauth_username', 'dlrnauth_password', 'api_url', 'repo_url']
+        args = ['dlrnauth_username', 'dlrnauth_password',
+                'api_url', 'repo_url']
         for arg in args:
             try:
                 setattr(self, arg, kwargs[arg])
@@ -216,7 +217,8 @@ class DlrnClient(object):
         list will be removed
         :param sort: Defines the method for sorting the results. The default
         from the api is to sort by reverse timestamp.
-        :param reverse: bool value to define if we want to invert sorting method
+        :param reverse: bool value to define if we want to invert
+               sorting method
         :return: a list of DlrnHash or DlrnAggregateHash objects
         """
         hash_list = []
@@ -388,8 +390,8 @@ class DlrnClient(object):
         #  url.HTTPError (without mocking side effect directly), so this part
         #  is only partially tested
         except (url.HTTPError, url.URLError):
-            self.log.error("Dlrn Promote: Error downloading component yaml info"
-                           " at %s", commit_url)
+            self.log.error("Dlrn Promote: Error downloading component yaml "
+                           "info at %s", commit_url)
             self.log.error("------- -------- Promoter aborted")
             raise PromotionError("Unable to fetch commits from component url")
         # AP step4: from commits.yaml extract commit/distro_hash to
@@ -644,11 +646,12 @@ class DlrnClient(object):
         return civotes_info
 
 
-def dump_to_dict(config, release_data, target_label):
+def dump_to_dict(config, release_data, candidate_label):
     d = DlrnClient(config)
-    promotions = d.fetch_promotions(target_label)
+    promotions = d.fetch_promotions(candidate_label)
     hash_dict = {}
-    criteria = release_data['promotions']['criteria']
+    criteria = [i['criteria'] for i in release_data['promotions'] if
+                i['source_label'] == candidate_label][0]
     for p_hash in promotions:
         params = p_hash.dump_to_dict()
         if p_hash.aggregate_hash not in hash_dict.keys():
@@ -662,12 +665,54 @@ def dump_to_dict(config, release_data, target_label):
     return hash_dict
 
 
-def get_hashes(release_data, target_label='tripleo-ci-testing'):
+def get_hashes(release_data, candidate_label='tripleo-ci-testing'):
     config = DlrnClientConfig(dlrnauth_username='ciuser',
                               dlrnauth_password='',
                               api_url=release_data['dlrn_host'])
 
-    return dump_to_dict(config, release_data, target_label)
+    return dump_to_dict(config, release_data, candidate_label)
+
+
+def get_component_hashes():
+    components = [
+        "baremetal", "cinder", "clients", "cloudops",
+        "common", "compute", "glance", "manila",
+        "network", "octavia", "security", "swift",
+        "tempest", "tripleo", "ui", "validation"
+    ]
+
+    api_url = 'http://trunk.rdoproject.org/api-centos9-master-uc/'
+    dlrnapi_client.configuration.password = 'ciuser'
+    dlrnapi_client.configuration.username = ''
+    api_client = dlrnapi_client.ApiClient(host=api_url)
+    api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+    # last_promotions = {}
+    # named_hashes_map = {}
+    #
+    # hashes_params = dlrnapi_client.PromotionQuery()
+    # jobs_params = dlrnapi_client.Params2()
+    # jobs_params_aggregate = dlrnapi_client.Params3()
+    # report_params = dlrnapi_client.Params3()
+    # promote_params = dlrnapi_client.Promotion()
+
+    get_repo_params = dlrnapi_client.Params()
+    components_list = []
+    for c in components:
+        get_repo_params.component = c
+        get_repo_params.max_age = 0
+        repo_data = api_instance.api_last_tested_repo_get(
+            params=get_repo_params)
+        components_list.append(repo_data)
+    components_dict = {}
+    for c in components_list:
+        params_2 = dlrnapi_client.Params2()
+        params_2.commit_hash = c.commit_hash
+        params_2.distro_hash = c.distro_hash
+        components_dict[c.component] = [i.to_dict() for i in
+                                        api_instance.api_repo_status_get(
+                                            params_2)]
+
+    return components_dict
 
 
 if __name__ == '__main__':

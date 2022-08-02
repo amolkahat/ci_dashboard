@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class Release(models.Model):
     release_id = models.IntegerField(primary_key=True, auto_created=True,
                                      null=False)

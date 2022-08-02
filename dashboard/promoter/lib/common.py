@@ -8,7 +8,7 @@ import socket
 import subprocess
 import sys
 import time
-from socket import error as ConnectionRefusedError  # noqa N812
+from socket import error as ConnectionRefusedError  # noqa: N812
 
 import jinja2
 import yaml

@@ -47,7 +47,6 @@ class DlrnHashError(Exception):
     pass
 
 
-# TODO(gcerami) we could use functools.total_ordering here
 class DlrnHashBase(object):
     """
     THis is the base abstract class for all type of hashes
@@ -126,9 +125,6 @@ class DlrnHashBase(object):
 
         self.sanity_check()
 
-        # TODO(gcerami) strict dlrn validation: check that the hashes are valid
-        # hashes with correct size
-
 
 class DlrnCommitDistroExtendedHash(DlrnHashBase):
     """
@@ -136,6 +132,12 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
     for the single pipeline
     It inherits from the base class and does not override the init
     """
+
+    def __init__(self, commit_hash=None, distro_hash=None, extended_hash=None,
+                 timestamp=None, aggregate_hash=None, source=None,
+                 component=None, label=None):
+        super().__init__(commit_hash, distro_hash, extended_hash, timestamp,
+                         aggregate_hash, source, component, label)
 
     def sanity_check(self):
         """
