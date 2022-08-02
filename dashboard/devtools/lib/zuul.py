@@ -2,8 +2,7 @@ import json
 import os
 
 import requests
-
-from . import tempest_html_json, utils  # noqa E402
+from devtools.lib import tempest_html_json, utils  # noqa: E402
 
 ZUUL_LIST = {
     'opendev': {'name:': 'opendev',

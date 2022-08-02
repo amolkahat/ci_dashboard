@@ -2,11 +2,8 @@ from devtools import models
 from devtools.lib import zuul
 from devtools.models import ZuulJob
 
-from .celery import app
 
-
-@app.task(bind=True)
-def add_history_records(self, job_dict):
+def add_history_records(job_dict):
     def extract_tests(zuulJob):
         test_data = []
         tests = zuulJob.get_tests()

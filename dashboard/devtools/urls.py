@@ -1,5 +1,5 @@
-from devtools.views import (job_history, launchpad_bugs, mirrors, review_list,
-                            zuul_jobs)
+from devtools.views import (job_history, launchpad_bugs, mark_done, mirrors,
+                            review_list, zuul_jobs)
 from django.urls import path
 
 urlpatterns = [
@@ -7,5 +7,6 @@ urlpatterns = [
     path('jobs/<str:job_name>', job_history, name='zuul_history'),
     path('launchpad/', launchpad_bugs, name='rr'),
     path('mirrors/', mirrors, name='mirrors'),
-    path('reviews/', review_list, name='review_list')
+    path('reviews/', review_list, name='review_list'),
+    path('reviews/<int:id>', mark_done, name='mark_done')
 ]

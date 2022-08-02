@@ -6,7 +6,8 @@ from django.test import TestCase
 ZUUL_JOB = {
     'id': 1,
     'job_name': 'periodic-tripleo-ci-centos-9-scenario001-standlaone',
-    'job_url': 'https://review.rdoproject.org/zuul/builds?job_name=periodic-tripleo-ci-centos-9-scenario001-standalone-master',
+    'job_url': 'https://review.rdoproject.org/zuul/builds?job_name='
+               'periodic-tripleo-ci-centos-9-scenario001-standalone-master',
     'job_domain': 'rdoproject.org',
 }
 

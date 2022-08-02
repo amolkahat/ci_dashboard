@@ -6,9 +6,8 @@ import logging
 import redis
 from devtools.lib.launchpad import get_bugs
 from devtools.lib.mirror_sync_status import get_rdo_mirrors
-from devtools.models import LaunchpadBugs, ZuulJob
-from devtools.serializers import (LaunchpadBugsSerializer,
-                                  ReviewListSerializer, ZuulJobWriteSerializer)
+from devtools.models import ZuulJob
+from devtools.serializers import ReviewListSerializer, ZuulJobWriteSerializer
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.core.exceptions import ValidationError
@@ -16,20 +15,22 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from pygerrit2 import Anonymous, GerritRestAPI
-from rest_framework import serializers
 from rest_framework import status as st
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
-from dashboard.tasks import add_history_records
-
 from .models import GerritModel
+
+logger = logging.getLogger(__name__)
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+redis_client = redis.Redis()
 
 CONFIG = {
     "rdoproject": "https://review.rdoproject.org/r/",
     "opendev": "https://review.opendev.org/",
-    "code.engineering.redhat.com": "https://code.engineering.redhat.com/gerrit/"
+    "code.engineering.redhat.com":
+        "https://code.engineering.redhat.com/gerrit/"
 }
 
 
@@ -61,7 +62,7 @@ def get_gerrit_meta(url):
     else:
         change_id = url.split("/")[-1].strip()
     auth = Anonymous()
-    rest = GerritRestAPI(url=full_url, auth=auth)
+    rest = GerritRestAPI(url=full_url, auth=auth, verify=False)
     changes = rest.get(f"/changes/{change_id}")
     return changes
 
@@ -71,7 +72,6 @@ def review_list(request):
     """
     """
     if request.method == "GET":
-        return_dict = {}
         data = GerritModel.objects.all()
         rl = ReviewListSerializer(data, many=True)
         return JsonResponse(rl.data, safe=False, status=st.HTTP_200_OK)
@@ -81,9 +81,7 @@ def review_list(request):
         data = {}
         url = request.data['review_url']
         data['review_url'] = url
-        reviews_list = GerritModel.objects.all()
-        serializer_data = ReviewListSerializer(reviews_list)
-        return_data.update({'list': serializer_data.data})
+        return_status = st.HTTP_200_OK
         if url_is_valid(url):
             review_data = get_gerrit_meta(url)
             if isinstance(review_data, dict):
@@ -95,30 +93,45 @@ def review_list(request):
                 })
                 try:
                     GerritModel(**data).save()
-                    status = st.HTTP_400_BAD_REQUEST
+                    return_status = st.HTTP_201_CREATED
                 except IntegrityError:
                     msg = f"Duplicate url: {url}"
                     return_data['error'] = True
                     return_data['msg'] = msg
-                    status = st.HTTP_400_BAD_REQUEST
-            else:
-                return_data.update({'list': reviews_list, 'error': True,
-                                    'msg': f'Invalid URL: {url}'})
-                status = st.HTTP_400_BAD_REQUEST
-            return JsonResponse(json.load(return_data), safe=False,
-                                status=status)
+                    return_status = st.HTTP_400_BAD_REQUEST
+            # else:
+            #     return_data.update({'list': reviews_list, 'error': True,
+            #                         'msg': f'Invalid URL: {url}'})
+            #     return_status = st.HTTP_400_BAD_REQUEST
+            # return JsonResponse(return_data, safe=False,
+            #                     status=return_status)
         else:
-            return_data.update({'list': serializer_data.data, 'error': True,
-                                'msg': f'Invalid URL: {url}'})
-        return JsonResponse(json.load(return_data), safe=False,
-                            status=st.HTTP_400_BAD_REQUEST)
+            return_data.update({'error': True, 'msg': f'Invalid URL: {url}'})
+            return_status = st.HTTP_400_BAD_REQUEST
+        gerrit_data = GerritModel.objects.all()
+        review_list = ReviewListSerializer(gerrit_data, many=True)
+
+        return_data.update({'list': review_list.data})
+        return JsonResponse(return_data, safe=False,
+                            status=return_status)
 
 
-logger = logging.getLogger(__name__)
-
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
-redis_client = redis.Redis()
+@api_view(['POST'])
+def mark_done(request, id):
+    if request.method == "POST":
+        if id is not None:
+            data = GerritModel.objects.filter(id=id)
+            if not data:
+                return JsonResponse({'msg': 'Invalid id'},
+                                    status=st.HTTP_404_NOT_FOUND)
+            else:
+                data[0].completed = True
+                data[0].save()
+                return JsonResponse({'msg': 'Marked done'},
+                                    status=st.HTTP_200_OK)
+        else:
+            return JsonResponse({'msg': 'Review id required'},
+                                status=st.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -134,7 +147,7 @@ def mirrors(request):
             else:
                 data = data[release]
             redis_client.setex(f'mirrors_{release}_{distro}', 10000,
-                             json.dumps(data))
+                               json.dumps(data))
         else:
             data = json.loads(data)
         return Response(data, status=st.HTTP_200_OK)
@@ -181,12 +194,12 @@ def launchpad_bugs(request):
     bugs = redis_client.get('launchpad_bugs')
     if not bugs:
         bugs_list = [{}]
-        status = ['New', 'Triaged', 'In Progress', 'Confirmed', 'Fix Committed']
+        status = ['New', 'Triaged', 'In Progress', 'Confirmed',
+                  'Fix Committed']
         bugs = get_bugs(status=status)
-        bugs_list = [{'id':bug.bug.id, 'status': bug.status,
-          'tag': bug.bug.tags, 'link': bug.web_link,
-          'title': bug.bug.title} for bug in bugs]
-        import pdb; pdb.set_trace()
+        bugs_list = [{'id': bug.bug.id, 'status': bug.status,
+                      'tag': bug.bug.tags, 'link': bug.web_link,
+                      'title': bug.bug.title} for bug in bugs]
         redis_client.setex('launchpad_bugs', 10000, json.dumps(bugs_list))
         return Response(bugs_list, status=st.HTTP_200_OK)
     else:

@@ -2,8 +2,10 @@ import configparser
 
 from devtools.lib import mirror_sync_status as mss
 
-CENTOS_8_COMPOSE = "https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID"
-CENTOS_9_COMPOSE = "https://odcs.stream.centos.org/production/latest-CentOS-Stream/compose/.composeinfo" # noqa E501
+CENTOS_8_COMPOSE = "https://composes.centos.org/latest-CentOS-Stream-8/" \
+                   "COMPOSE_ID"
+CENTOS_9_COMPOSE = "https://odcs.stream.centos.org/production/" \
+                   "latest-CentOS-Stream/compose/.composeinfo"
 
 config = configparser.ConfigParser()
 
@@ -19,6 +21,7 @@ class TestMirrorSyncStatus:
     """
     Test Tripleo Mirror Sync status class
     """
+
     def test_get_centos_compose_id_stream_9(self):
         """
         Test centos stream 9 compose id

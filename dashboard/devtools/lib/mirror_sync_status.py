@@ -53,8 +53,10 @@ releases = ["master", "wallaby", "victoria", "ussuri", "train"]
 rdo_content_port_slug = "8080/rdo"
 
 # CentOS Package Compose
-CENTOS_8_COMPOSE = "https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID"
-CENTOS_9_COMPOSE = "https://odcs.stream.centos.org/production/latest-CentOS-Stream/compose/.composeinfo"  # noqa E501
+CENTOS_8_COMPOSE = "https://composes.centos.org/latest-CentOS-Stream-8/" \
+                   "COMPOSE_ID"
+CENTOS_9_COMPOSE = "https://odcs.stream.centos.org/production/" \
+                   "latest-CentOS-Stream/compose/.composeinfo"  # noqa E501
 
 # CentOS Mirror slug
 CENTOS_8_SLUG = "centos/8-stream/COMPOSE_ID"

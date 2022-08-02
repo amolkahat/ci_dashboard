@@ -1,5 +1,3 @@
-import json
-
 import redis
 from django.test import Client, TestCase
 
@@ -23,5 +21,5 @@ class TestDevtoolsViews(TestCase):
 
     def test_mirror_view_with_args(self):
         response = client.get('/api/mirrors/', {'release': 'master',
-                                               'distro': 'def'})
+                                                'distro': 'def'})
         self.assertEqual(response.data, 'Invalid release or distro')
