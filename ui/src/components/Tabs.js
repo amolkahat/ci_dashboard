@@ -14,19 +14,15 @@ import { ReleaseToolbar } from './Dropdown';
 import BasicSpinner from './Spinner';
 import ReviewList from '../apps/ReviewList';
 import { useSelector, useDispatch } from 'react-redux';
+import MirrorTable from './Mirrors';
 
 
 
 const RRToolsTab = (props) => {
-  const [activeTabKey, setactiveTabKey] = useState(0)
+  const [activeTabKey, setactiveTabKey] = useState(1)
   const [error, seterror] = useState("")
   const [launchpad, setlaunchpad] = useState([])
-  const [mirrors, setMirrors] = useState([])
   const [loading, setLoading] = useState(true)
-
-  const relDistro = useSelector((state)=> state.release)
-  const distro = relDistro.distro
-  const release = relDistro.release
 
   function handleTabClick(event, tabIndex){
       setactiveTabKey(tabIndex);
@@ -34,7 +30,6 @@ const RRToolsTab = (props) => {
 
   useEffect(() => {
     getLaunchpadBugs()
-    fetchMirrors()
   }, [])
 
   function getLaunchpadBugs(){
@@ -42,46 +37,7 @@ const RRToolsTab = (props) => {
     .get("http://localhost:8000/api/launchpad/")
     .then(res => setlaunchpad(res.data))
     .catch(err => seterror(err))
-  }
-
-  async function fetchMirrors(){
-    seterror('')
-    try{
-      const resp = await axios
-      .get(`http://localhost:8000/api/mirrors/?release=${release}&distro=${distro}`)
-
-      setMirrors(resp.data)
-      setLoading(false)
-    }catch(error){
-      seterror(error.response)
-    }
-  }
-
-  const MirrorTable = (props) => {
-      return <TableComposable
-                aria-label='Mirrors Table'
-                variant='compact'
-              >
-          <Caption> Mirrors Table </Caption>
-            <Thead>
-              <Tr>
-                <Th>Mirror Name</Th>
-                <Th>Mirror Status</Th>
-                <Th>Release</Th>
-                <Th>Distro</Th>
-              </Tr>
-            </Thead>
-          <Tbody>
-            {mirrors.map(item => (
-              <Tr key={item.name}>
-                <Td dataLabel="Mirror Name">{item.name}</Td>
-                <Td dataLabel="Mirror Status">{item.status}</Td>
-                <Td dataLabel="Release">{item.release}</Td>
-                <Td dataLabel="Distro">{item.distro}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-          </TableComposable>
+    setLoading(false)
   }
 
   return (
@@ -119,9 +75,7 @@ const RRToolsTab = (props) => {
               <TabTitleText>Mirrors</TabTitleText>{' '}
             </>
           } >
-            <ReleaseToolbar buttonOnClick={fetchMirrors}
-                        buttonTitle="Get Mirrors"/>
-             {error ? <Alert variant='danger' title={error.message}/> :  loading ? <BasicSpinner/>: <MirrorTable/>}
+            <MirrorTable/>
         </Tab>
         <Tab eventKey={5} title={
             <>

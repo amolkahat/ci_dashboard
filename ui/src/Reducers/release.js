@@ -5,10 +5,15 @@ const release = (state = initialState, action) => {
         case "SET_RELEASE":
             console.log("SET RELEASE Called")
             console.log(state, action)
-            return {
-                ...state,
-                release: action.payload 
-            };
+            if (action.payload !== 'undefined'){
+                return {
+                    ...state,
+                    release: action.payload
+                };
+            }else{
+                return state
+            }
+
         case "SET_DISTRO":
             return {
                 ...state,

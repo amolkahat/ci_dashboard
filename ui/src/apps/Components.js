@@ -16,7 +16,7 @@ export default function OSPComponent() {
       .then(res => {console.log(res.data)
         setComponent(res.data)})
     }, [])
-    
+
     function onToggle(isExpanded, itemID){
         setIsExpanded(!isExpanded)
         if (activeItem === itemID){
@@ -40,7 +40,7 @@ export default function OSPComponent() {
                         {i[1].map(comp =>{
                             return <ListItem key={comp.timestamp}>{comp.job_id} {comp.success ? "PASS": "FAILURE"}</ListItem>
                         })}
-                    </List> 
+                    </List>
                 </CardBasic>
                 </ExpandableSection>
             </div>

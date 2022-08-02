@@ -71,7 +71,7 @@ export const HashExpandableSection =  (props) => {
       </ExpandableSection>
     )
   })
-  
+
   return (
     <div>
       {dispay}

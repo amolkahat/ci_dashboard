@@ -6,6 +6,18 @@ import { Table, TableHeader, TableBody } from '@patternfly/react-table';
 import { Checkbox } from '@patternfly/react-core';
 import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 
+export const EmptyStateRow = <Td colSpan={8}>
+<Bullseye>
+    <EmptyState variant={EmptyStateVariant.small}>
+    <EmptyStateIcon icon={SearchIcon} />
+    <Title headingLevel="h2" size="lg">
+        No results found
+    </Title>
+    <EmptyStateBody>Clear all filters and try again.</EmptyStateBody>
+    <Button variant="link">Clear all filters</Button>
+    </EmptyState>
+</Bullseye>
+</Td>
 
 export const DynamicTable = (props) => {
   const head = props.head;
@@ -131,18 +143,7 @@ export const ComposableTableStriped = (props) => {
                   <Button variant="secondary" onClick={() => props.done(repo.id)} isAriaDisabled={repo.completed}> Done </Button>
                 </TableText></Td>
             </Tr>
-            )): <Td colSpan={8}>
-            <Bullseye>
-                <EmptyState variant={EmptyStateVariant.small}>
-                <EmptyStateIcon icon={SearchIcon} />
-                <Title headingLevel="h2" size="lg">
-                    No results found
-                </Title>
-                <EmptyStateBody>Clear all filters and try again.</EmptyStateBody>
-                <Button variant="link">Clear all filters</Button>
-                </EmptyState>
-            </Bullseye>
-            </Td>}
+            )): <EmptyStateRow/>}
         </Tbody>
         </TableComposable>
     </OuterScrollContainer>
