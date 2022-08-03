@@ -15,18 +15,8 @@ import ListIcon from '@patternfly/react-icons/dist/esm/icons/list-icon';
 import BuildICon from '@patternfly/react-icons/dist/esm/icons/build-icon';
 
 import { useSelector, useDispatch } from 'react-redux';
-
-
-import {
-    Bullseye,
-    EmptyState,
-    EmptyStateVariant,
-    EmptyStateIcon,
-    Title,
-    EmptyStateBody,
-    Button
-  } from '@patternfly/react-core';
-  import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
+import { EmptyStateRow } from "../components/Table";
+import { AboutModalBasic } from "../components/Modal";
 
 
 export const Promoter = props => {
@@ -72,6 +62,21 @@ export const Promoter = props => {
         }
     }
 
+    async function PromoteHash(){
+        try{
+            setInfo("Promoting Hash")
+            console.log("Promote hash Called")
+            // const resp = await axios
+            // .get(`http://localhost:8000/api/promotions/?release=${release}&distro=${distro}`)
+            // setData(resp.data)
+            // setLoading(false)
+            // setError("")
+            // setInfo("")
+        }catch(error){
+            setError(error.response)
+        }
+    }
+
     const PromoteToolbar = (props) => {
         const ProjecText = props.missing_jobs.map(key => {
         return `
@@ -87,8 +92,8 @@ export const Promoter = props => {
                 <ToolbarContent>
                     <ToolbarItem>Missing Jobs</ToolbarItem>
                     <ToolbarItem variant="separator"/>
-                    <ToolbarItem><Button variant="primary">Promote hash</Button></ToolbarItem>
-                    <ToolbarItem variant="separator"/>
+                    {/* <ToolbarItem></ToolbarItem>
+                    <ToolbarItem variant="separator"/> */}
                     <ToolbarItem>
                     <ClipboardCopy isCode hoverTip="Copy" clickTip="Copied" variant={ClipboardCopyVariant.expansion}>
                     {`- project:
@@ -165,16 +170,28 @@ export const Promoter = props => {
                         <OuterScrollContainer>
                             <InnerScrollContainer>
                             <TableComposable aria-label="Expandable table" variant='compact'>
-                                <Caption>Promotion Hashes</Caption>
+                                <Caption>
+                                   <Toolbar id='promoter-toolbar'>
+                                        <ToolbarContent>
+                                            <ToolbarItem>Promotion Hashes</ToolbarItem>
+                                            <ToolbarItem variant="separator"/>
+                                            <ToolbarItem>
+                                                <AboutModalBasic  
+                                                    isDisabled={value[1].missing_jobs.length <= 5 ? false : true}
+                                                    buttonText={"Promote hash"}
+                                                    headLine={"Promote Hash"}
+                                                    promoteMethod={PromoteHash}
+                                                    promotionHash={value[1].hash_list}/>
+                                            </ToolbarItem>
+                                        </ToolbarContent>
+                                    </Toolbar>
+                                </Caption>
                                 <Thead>
                                     <Tr>
                                     <Th>{columnNames.component}</Th>
                                     <Th>{columnNames.commit_hash}</Th>
                                     <Th>{columnNames.distro_hash}</Th>
-                                    <Th>
-                                        {columnNames.timestamp}
-                                    </Th>
-                                    {/* <Th>{columnNames.extended_hash}</Th> */}
+                                    <Th>{columnNames.timestamp}</Th>
                                     </Tr>
                                 </Thead>
                                 <Tbody >
@@ -187,20 +204,7 @@ export const Promoter = props => {
 
                                         {/* <Td>{hash.extended_hash || "-"}</Td> */}
                                         </Tr>
-                                    }) : <Tr>
-                                    <Td colSpan={8}>
-                                    <Bullseye>
-                                        <EmptyState variant={EmptyStateVariant.small}>
-                                        <EmptyStateIcon icon={SearchIcon} />
-                                        <Title headingLevel="h2" size="lg">
-                                            No results found
-                                        </Title>
-                                        <EmptyStateBody>Clear all filters and try again.</EmptyStateBody>
-                                        <Button variant="link">Clear all filters</Button>
-                                        </EmptyState>
-                                    </Bullseye>
-                                    </Td>
-                                    </Tr>}
+                                    }) : EmptyStateRow}
                                 </Tbody>
                             </TableComposable>
                             </InnerScrollContainer>
